@@ -8,12 +8,12 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
  */
 
 // Get API URL from environment variables
-const API_BASE_URL = Constants.expoConfig?.extra?.apiUrl || 'http://localhost:3000/api';
+const API_BASE_URL = Constants.expoConfig?.extra?.apiUrl || 'http://localhost:5000/api';
 
 // Create Axios instance
 const apiClient = axios.create({
   baseURL: API_BASE_URL,
-  timeout: 10000,
+  timeout: 30000, // Increased timeout for file uploads
   headers: {
     'Content-Type': 'application/json',
   },
