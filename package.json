@@ -21,6 +21,7 @@
     "expo": "~54.0.30",
     "expo-camera": "^17.0.10",
     "expo-constants": "^18.0.12",
+    "expo-document-picker": "~14.0.8",
     "expo-image-picker": "^17.0.10",
     "expo-status-bar": "~3.0.9",
     "formik": "^2.4.9",
@@ -37,6 +38,7 @@
   "private": true,
   "devDependencies": {
     "@babel/eslint-parser": "^7.28.5",
+    "babel-preset-expo": "^54.0.9",
     "eslint": "^9.39.2",
     "eslint-config-prettier": "^10.1.8",
     "eslint-plugin-react": "^7.37.5",
