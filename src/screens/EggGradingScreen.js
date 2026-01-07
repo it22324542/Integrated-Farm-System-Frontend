@@ -10,8 +10,8 @@ import {
   Alert,
   Dimensions
 } from 'react-native';
-import { LinearGradient } from 'expo-linear-gradient';
 import { EggGradingAPI } from '../config/api';
+import { COLORS } from '../constants/theme';
 
 const { width } = Dimensions.get('window');
 
@@ -74,60 +74,86 @@ const EggGradingScreen = () => {
 
   const getGradeColor = (grade) => {
     switch(grade) {
-      case 'A':  return '#4CAF50';
-      case 'B': return '#2196F3';
-      case 'C': return '#FF9800';
-      default: return '#666';
+      case 'A':  return COLORS.secondary;
+      case 'B': return COLORS.primary;
+      case 'C': return COLORS.accent;
+      default: return COLORS.neutral.dark;
+    }
+  };
+
+  const getGradeLabel = (grade) => {
+    switch(grade) {
+      case 'A': return 'Premium Grade';
+      case 'B': return 'Standard Grade';
+      case 'C': return 'Good Grade';
+      default: return 'Classified';
     }
   };
 
   return (
-    <LinearGradient
-      colors={['#667eea', '#764ba2']}
-      style={styles.container}
-    >
+    <View style={styles.container}>
       <ScrollView 
         contentContainerStyle={styles.scrollContent}
         showsVerticalScrollIndicator={false}
       >
         <View style={styles.card}>
           {/* Header */}
-          <Text style={styles.title}>🥚 Egg Grading System</Text>
-          <Text style={styles.subtitle}>Enter egg measurements to predict its grade</Text>
+          <View style={styles.headerSection}>
+            <View style={styles.iconContainer}>
+              <Text style={styles.headerIcon}>📏</Text>
+            </View>
+            <Text style={styles.title}>Egg Grading Analysis</Text>
+            <Text style={styles.subtitle}>Enter precise measurements for accurate grade prediction</Text>
+          </View>
 
           {/* Form */}
           <View style={styles.form}>
             <View style={styles.inputGroup}>
-              <Text style={styles.label}>Height (mm)</Text>
+              <View style={styles.labelRow}>
+                <Text style={styles.label}>Height</Text>
+                <Text style={styles.unit}>mm</Text>
+              </View>
               <TextInput
                 style={styles.input}
-                placeholder="e.g., 54. 5"
+                placeholder="54.5"
                 keyboardType="decimal-pad"
+                placeholderTextColor={COLORS.neutral.medium}
                 value={formData.height}
                 onChangeText={(value) => handleChange('height', value)}
               />
+              <Text style={styles.hint}>Physical height of the egg</Text>
             </View>
 
             <View style={styles.inputGroup}>
-              <Text style={styles.label}>Diameter (mm)</Text>
+              <View style={styles.labelRow}>
+                <Text style={styles.label}>Diameter</Text>
+                <Text style={styles.unit}>mm</Text>
+              </View>
               <TextInput
                 style={styles.input}
-                placeholder="e.g., 47. 5"
+                placeholder="47.5"
                 keyboardType="decimal-pad"
+                placeholderTextColor={COLORS.neutral.medium}
                 value={formData.diameter}
                 onChangeText={(value) => handleChange('diameter', value)}
               />
+              <Text style={styles.hint}>Width of the egg</Text>
             </View>
 
             <View style={styles.inputGroup}>
-              <Text style={styles.label}>Weight (g)</Text>
+              <View style={styles.labelRow}>
+                <Text style={styles.label}>Weight</Text>
+                <Text style={styles.unit}>g</Text>
+              </View>
               <TextInput
                 style={styles.input}
-                placeholder="e.g., 65. 6"
+                placeholder="65.6"
                 keyboardType="decimal-pad"
+                placeholderTextColor={COLORS.neutral.medium}
                 value={formData.weight}
                 onChangeText={(value) => handleChange('weight', value)}
               />
+              <Text style={styles.hint}>Mass of the egg</Text>
             </View>
 
             {/* Buttons */}
@@ -138,16 +164,20 @@ const EggGradingScreen = () => {
                 disabled={loading}
               >
                 {loading ? (
-                  <ActivityIndicator color="#fff" />
+                  <ActivityIndicator color={COLORS.neutral.white} size="small" />
                 ) : (
-                  <Text style={styles.buttonText}>Predict Grade</Text>
+                  <>
+                    <Text style={styles.buttonIcon}>✓</Text>
+                    <Text style={styles.buttonText}>Predict Grade</Text>
+                  </>
                 )}
               </TouchableOpacity>
 
               <TouchableOpacity 
-                style={[styles. button, styles.secondaryButton]}
+                style={[styles.button, styles.secondaryButton]}
                 onPress={handleReset}
               >
+                <Text style={styles.buttonIcon}>↺</Text>
                 <Text style={[styles.buttonText, styles.secondaryButtonText]}>Reset</Text>
               </TouchableOpacity>
             </View>
@@ -155,26 +185,26 @@ const EggGradingScreen = () => {
 
           {/* Results */}
           {result && (
-            <View style={styles. resultContainer}>
-              <Text style={styles.resultHeader}>Prediction Result</Text>
+            <View style={styles.resultContainer}>
+              <Text style={styles.resultHeader}>Analysis Result</Text>
               
               {/* Grade Display */}
-              <View style={[styles.gradeDisplay, { borderColor: getGradeColor(result.grade) }]}>
-                <Text style={styles.gradeLabel}>GRADE</Text>
+              <View style={[styles.gradeDisplay, { borderColor: getGradeColor(result.grade), backgroundColor: `${getGradeColor(result.grade)}10` }]}>
                 <Text style={[styles.gradeValue, { color: getGradeColor(result.grade) }]}>
                   {result.grade}
                 </Text>
+                <Text style={styles.gradeLabel}>{getGradeLabel(result.grade)}</Text>
               </View>
 
               {/* Probabilities */}
               {result.probabilities && (
                 <View style={styles.probabilities}>
-                  <Text style={styles.sectionTitle}>Confidence Levels</Text>
+                  <Text style={styles.sectionTitle}>Confidence Distribution</Text>
                   {Object.entries(result.probabilities).map(([grade, prob]) => (
-                    <View key={grade} style={styles. probabilityBar}>
-                      <View style={styles.probabilityLabel}>
-                        <Text style={styles.probabilityText}>Grade {grade}</Text>
-                        <Text style={styles.probabilityText}>{(prob * 100).toFixed(2)}%</Text>
+                    <View key={grade} style={styles.probabilityBar}>
+                      <View style={styles.probabilityHeader}>
+                        <Text style={styles.probabilityGrade}>Grade {grade}</Text>
+                        <Text style={styles.probabilityPercent}>{(prob * 100).toFixed(1)}%</Text>
                       </View>
                       <View style={styles.progressBar}>
                         <View 
@@ -196,15 +226,15 @@ const EggGradingScreen = () => {
               <View style={styles.measurements}>
                 <Text style={styles.sectionTitle}>Input Measurements</Text>
                 <View style={styles.measurementItem}>
-                  <Text style={styles.measurementLabel}>Height:</Text>
+                  <Text style={styles.measurementLabel}>Height</Text>
                   <Text style={styles.measurementValue}>{result.measurements.height} mm</Text>
                 </View>
                 <View style={styles.measurementItem}>
-                  <Text style={styles.measurementLabel}>Diameter:</Text>
-                  <Text style={styles. measurementValue}>{result.measurements.diameter} mm</Text>
+                  <Text style={styles.measurementLabel}>Diameter</Text>
+                  <Text style={styles.measurementValue}>{result.measurements.diameter} mm</Text>
                 </View>
                 <View style={styles.measurementItem}>
-                  <Text style={styles.measurementLabel}>Weight:</Text>
+                  <Text style={styles.measurementLabel}>Weight</Text>
                   <Text style={styles.measurementValue}>{result.measurements.weight} g</Text>
                 </View>
               </View>
@@ -212,170 +242,228 @@ const EggGradingScreen = () => {
           )}
         </View>
       </ScrollView>
-    </LinearGradient>
+    </View>
   );
 };
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+    backgroundColor: COLORS.neutral.light,
   },
   scrollContent: {
-    padding: 20,
-    paddingTop: 60,
+    padding: 16,
+    paddingTop: 0,
     paddingBottom: 40,
   },
   card: {
-    backgroundColor:  '#fff',
-    borderRadius: 20,
-    padding: 25,
+    backgroundColor: COLORS.neutral.white,
+    borderRadius: 8,
+    padding: 20,
     shadowColor: '#000',
-    shadowOffset: { width: 0, height: 10 },
-    shadowOpacity:  0.3,
-    shadowRadius: 20,
-    elevation: 10,
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.06,
+    shadowRadius: 6,
+    elevation: 2,
   },
-  title:  {
-    fontSize: 28,
-    fontWeight: 'bold',
+  headerSection: {
+    alignItems: 'center',
+    marginBottom: 28,
+    paddingTop: 16,
+  },
+  iconContainer: {
+    width: 64,
+    height: 64,
+    borderRadius: 6,
+    backgroundColor: `${COLORS.primary}12`,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginBottom: 16,
+    borderWidth: 1,
+    borderColor: COLORS.primary,
+  },
+  headerIcon: {
+    fontSize: 32,
+  },
+  title: {
+    fontSize: 24,
+    fontWeight: '800',
     textAlign: 'center',
-    color: '#333',
+    color: COLORS.neutral.darker,
     marginBottom: 8,
   },
-  subtitle:  {
+  subtitle: {
     textAlign: 'center',
-    color: '#666',
-    fontSize: 14,
-    marginBottom: 30,
+    color: COLORS.neutral.dark,
+    fontSize: 13,
+    lineHeight: 19,
+    fontWeight: '400',
   },
-  form:  {
-    marginBottom: 20,
+  form: {
+    marginBottom: 24,
   },
   inputGroup: {
-    marginBottom: 20,
+    marginBottom: 18,
   },
-  label:  {
-    fontWeight: '600',
-    color: '#333',
+  labelRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
     marginBottom: 8,
-    fontSize: 15,
   },
-  input:  {
-    borderWidth: 2,
-    borderColor: '#e0e0e0',
-    borderRadius: 10,
-    padding: 12,
-    fontSize: 16,
-    backgroundColor: '#fff',
+  label: {
+    fontWeight: '700',
+    color: COLORS.neutral.darker,
+    fontSize: 13,
+  },
+  unit: {
+    fontSize: 11,
+    color: COLORS.neutral.medium,
+    fontWeight: '600',
+  },
+  input: {
+    borderWidth: 1,
+    borderColor: COLORS.neutral.lighter,
+    borderRadius: 6,
+    padding: 11,
+    fontSize: 15,
+    backgroundColor: COLORS.neutral.white,
+    color: COLORS.neutral.darker,
+    marginBottom: 6,
+    fontWeight: '500',
+  },
+  hint: {
+    fontSize: 11,
+    color: COLORS.neutral.medium,
+    fontWeight: '400',
   },
   buttonGroup: {
-    marginTop: 10,
+    marginTop: 22,
     gap: 12,
   },
-  button:  {
-    padding: 16,
-    borderRadius: 10,
+  button: {
+    padding: 13,
+    borderRadius: 6,
     alignItems: 'center',
     justifyContent: 'center',
+    flexDirection: 'row',
+    gap: 8,
   },
   primaryButton: {
-    backgroundColor: '#667eea',
-    shadowColor: '#667eea',
-    shadowOffset:  { width: 0, height:  4 },
-    shadowOpacity:  0.3,
-    shadowRadius: 8,
-    elevation: 5,
+    backgroundColor: COLORS.primary,
+    shadowColor: COLORS.primary,
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.12,
+    shadowRadius: 6,
+    elevation: 3,
   },
   secondaryButton: {
-    backgroundColor: '#f5f5f5',
+    backgroundColor: COLORS.neutral.lighter,
+    borderWidth: 1,
+    borderColor: COLORS.neutral.medium,
+  },
+  buttonIcon: {
+    fontSize: 16,
+    fontWeight: '700',
   },
   buttonText: {
-    color: '#fff',
-    fontSize: 16,
-    fontWeight: '600',
+    color: COLORS.neutral.white,
+    fontSize: 14,
+    fontWeight: '700',
+    letterSpacing: 0.2,
   },
   secondaryButtonText: {
-    color: '#333',
+    color: COLORS.neutral.darker,
   },
   resultContainer: {
-    marginTop: 30,
+    marginTop: 28,
+    paddingTop: 22,
+    borderTopWidth: 1,
+    borderTopColor: COLORS.neutral.lighter,
   },
   resultHeader: {
-    fontSize: 20,
-    fontWeight: 'bold',
-    color: '#333',
+    fontSize: 16,
+    fontWeight: '700',
+    color: COLORS.neutral.darker,
     textAlign: 'center',
-    marginBottom: 20,
+    marginBottom: 18,
   },
   gradeDisplay: {
-    backgroundColor: '#f8f9fa',
-    borderWidth: 3,
-    borderRadius: 15,
-    padding:  30,
+    borderWidth: 2,
+    borderRadius: 6,
+    padding: 26,
     alignItems: 'center',
-    marginBottom: 25,
-  },
-  gradeLabel: {
-    fontSize: 12,
-    color: '#666',
-    letterSpacing: 2,
-    marginBottom: 8,
+    marginBottom: 22,
   },
   gradeValue: {
-    fontSize: 72,
-    fontWeight: 'bold',
+    fontSize: 56,
+    fontWeight: '800',
+    marginBottom: 6,
+    letterSpacing: -2,
+  },
+  gradeLabel: {
+    fontSize: 13,
+    color: COLORS.neutral.dark,
+    fontWeight: '700',
   },
   probabilities: {
-    marginBottom: 25,
+    marginBottom: 22,
   },
   sectionTitle: {
-    fontSize:  16,
-    fontWeight: '600',
-    color: '#333',
-    marginBottom: 15,
+    fontSize: 14,
+    fontWeight: '700',
+    color: COLORS.neutral.darker,
+    marginBottom: 12,
   },
   probabilityBar: {
-    marginBottom: 15,
+    marginBottom: 12,
   },
-  probabilityLabel: {
+  probabilityHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     marginBottom: 6,
   },
-  probabilityText: {
-    fontSize: 13,
-    color: '#666',
+  probabilityGrade: {
+    fontSize: 12,
+    color: COLORS.neutral.darker,
+    fontWeight: '700',
   },
-  progressBar:  {
-    height: 10,
-    backgroundColor: '#e0e0e0',
-    borderRadius: 5,
+  probabilityPercent: {
+    fontSize: 12,
+    color: COLORS.neutral.dark,
+    fontWeight: '700',
+  },
+  progressBar: {
+    height: 7,
+    backgroundColor: COLORS.neutral.lighter,
+    borderRadius: 3,
     overflow: 'hidden',
   },
   progressFill: {
     height: '100%',
-    borderRadius: 5,
+    borderRadius: 3,
   },
   measurements: {
-    backgroundColor: '#f8f9fa',
-    borderRadius: 10,
-    padding: 20,
+    backgroundColor: COLORS.neutral.lighter,
+    borderRadius: 6,
+    padding: 14,
   },
   measurementItem: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    paddingVertical: 10,
+    paddingVertical: 9,
     borderBottomWidth: 1,
-    borderBottomColor: '#e0e0e0',
+    borderBottomColor: COLORS.neutral.medium,
   },
-  measurementLabel:  {
-    fontWeight: '600',
-    color: '#666',
-    fontSize: 14,
+  measurementLabel: {
+    fontWeight: '700',
+    color: COLORS.neutral.dark,
+    fontSize: 12,
   },
   measurementValue: {
-    color: '#333',
-    fontSize:  14,
+    color: COLORS.neutral.darker,
+    fontSize: 12,
+    fontWeight: '700',
   },
 });
 
