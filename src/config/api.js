@@ -8,7 +8,8 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
  */
 
 // Get API URL from environment variables
-const API_BASE_URL = Constants.expoConfig?.extra?.apiUrl || 'http://localhost:3000/api';
+// Backend default for local dev: http://localhost:5000/api
+const API_BASE_URL = Constants.expoConfig?.extra?.apiUrl || 'http://localhost:5000/api';
 
 // Create Axios instance
 const apiClient = axios.create({
