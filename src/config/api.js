@@ -1,6 +1,6 @@
 // API Configuration
 const API_CONFIG = {
-  BASE_URL: 'http://172.20.10.7:5000',
+  BASE_URL: 'http://localhost:5000',
   ENDPOINTS: {
     // Egg Grading (existing)
     GRADING_PREDICT: '/api/egg-grading/predict',
