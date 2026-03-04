@@ -105,7 +105,52 @@ export const uploadImage = async (imageFile, onUploadProgress = null) => {
   }
 };
 
+/**
+ * Upload poultry dropping image for disease detection (Step 3)
+ * @param {Object} imageFile - Image file object (from camera or gallery)
+ * @param {function} onUploadProgress - Optional callback for upload progress
+ * @returns {Promise<Object>} Prediction result with disease details
+ */
+export const uploadDropping = async (imageFile, onUploadProgress = null) => {
+  try {
+    const formData = new FormData();
+
+    // Handle web vs React Native file formats
+    if (imageFile instanceof File || imageFile instanceof Blob) {
+      formData.append('file', imageFile);
+    } else {
+      formData.append('file', {
+        uri: imageFile.uri,
+        type: imageFile.type || 'image/jpeg',
+        name: imageFile.name || 'dropping_image.jpg',
+      });
+    }
+
+    const config = {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+    };
+
+    if (onUploadProgress) {
+      config.onUploadProgress = (progressEvent) => {
+        const percentCompleted = Math.round(
+          (progressEvent.loaded * 100) / progressEvent.total
+        );
+        onUploadProgress(percentCompleted);
+      };
+    }
+
+    const response = await apiClient.post('/dropping/upload', formData, config);
+    return response;
+  } catch (error) {
+    console.error('Dropping upload error:', error);
+    throw error;
+  }
+};
+
 export default {
   uploadSound,
   uploadImage,
+  uploadDropping,
 };

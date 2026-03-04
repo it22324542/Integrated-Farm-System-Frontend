@@ -3,6 +3,7 @@ import { NavigationContainer } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
 import SoundUploadScreen from '../screens/SoundUploadScreen';
 import ImageUploadScreen from '../screens/ImageUploadScreen';
+import DroppingUploadScreen from '../screens/DroppingUploadScreen';
 
 /**
  * Root Navigation
@@ -27,6 +28,9 @@ const RootNavigator = () => {
           headerTitleStyle: {
             fontWeight: 'bold',
           },
+          // Ensures every screen card fills the available height so that
+          // ScrollView children can scroll properly on web and native.
+          cardStyle: { flex: 1 },
         }}
       >
         {/* Step 1: Sound Analysis */}
@@ -45,6 +49,15 @@ const RootNavigator = () => {
           component={ImageUploadScreen}
           options={{ 
             title: 'Image Analysis',
+          }}
+        />
+
+        {/* Step 3: Disease Detection By Using Dropping Images */}
+        <Stack.Screen
+          name="DroppingUpload"
+          component={DroppingUploadScreen}
+          options={{
+            title: 'Disease Detection',
           }}
         />
       </Stack.Navigator>

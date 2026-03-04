@@ -210,6 +210,15 @@ const ImageUploadScreen = ({ navigation, route }) => {
   };
 
   /**
+   * Navigate to Step 3: Dropping Disease Detection
+   */
+  const goToDropping = () => {
+    navigation.navigate('DroppingUpload', {
+      imagePredictionId: result?.prediction_id,
+    });
+  };
+
+  /**
    * Get result color based on outcome
    */
   const getResultColor = (resultType) => {
@@ -298,7 +307,15 @@ const ImageUploadScreen = ({ navigation, route }) => {
           </View>
 
           <Text style={styles.resultMessage}>{result.message}</Text>
-
+          {/* Proceed to Step 3 when Unhealthy */}
+          {result.result === 'Unhealthy' && (
+            <TouchableOpacity
+              style={styles.proceedButton}
+              onPress={goToDropping}
+            >
+              <Text style={styles.proceedButtonText}>🔬 Proceed to Disease Detection (Step 3)</Text>
+            </TouchableOpacity>
+          )}
           {/* Action Buttons */}
           <View style={styles.buttonRow}>
             <TouchableOpacity
@@ -528,6 +545,18 @@ const styles = StyleSheet.create({
     fontSize: 12,
     color: '#6A1B9A',
     textAlign: 'center',
+  },
+  proceedButton: {
+    backgroundColor: '#7B1FA2',
+    borderRadius: 12,
+    padding: 16,
+    alignItems: 'center',
+    marginBottom: 14,
+  },
+  proceedButtonText: {
+    color: '#fff',
+    fontSize: 16,
+    fontWeight: 'bold',
   },
 });
 
