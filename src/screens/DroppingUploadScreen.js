@@ -685,14 +685,6 @@ const DroppingUploadScreen = ({ navigation, route }) => {
           <Text style={styles.pickButtonText}>📷 Camera</Text>
         </TouchableOpacity>
 
-        <TouchableOpacity
-          style={[styles.pickButton, styles.galleryButton, { marginTop: 10 }]}
-          onPress={pickFromGallery}
-          disabled={uploading}
-        >
-          <Text style={styles.pickButtonText}>🖼️ Gallery</Text>
-        </TouchableOpacity>
-
         {imageFile && (
           <View style={styles.fileInfo}>
             <Text style={styles.fileInfoText}>Dropping image ready for analysis</Text>
