@@ -239,23 +239,13 @@ const ImageUploadScreen = ({ navigation, route }) => {
           </View>
         )}
 
-        <View style={styles.buttonRow}>
-          <TouchableOpacity
-            style={[styles.pickButton, styles.cameraButton]}
-            onPress={takePhoto}
-            disabled={uploading}
-          >
-            <Text style={styles.pickButtonText}>📷 Camera</Text>
-          </TouchableOpacity>
-
-          <TouchableOpacity
-            style={[styles.pickButton, styles.galleryButton]}
-            onPress={pickFromGallery}
-            disabled={uploading}
-          >
-            <Text style={styles.pickButtonText}>🖼️ Gallery</Text>
-          </TouchableOpacity>
-        </View>
+        <TouchableOpacity
+          style={[styles.pickButton, styles.cameraButton]}
+          onPress={takePhoto}
+          disabled={uploading}
+        >
+          <Text style={styles.pickButtonText}>📷 Camera</Text>
+        </TouchableOpacity>
 
         {imageFile && (
           <View style={styles.fileInfo}>
@@ -407,11 +397,9 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
   },
   pickButton: {
-    flex: 1,
     borderRadius: 8,
     padding: 15,
     alignItems: 'center',
-    marginHorizontal: 5,
   },
   cameraButton: {
     backgroundColor: '#FF5722',
