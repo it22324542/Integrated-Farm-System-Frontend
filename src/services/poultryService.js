@@ -13,12 +13,27 @@ import apiClient from '../config/api';
  */
 export const uploadSound = async (audioFile, onUploadProgress = null) => {
   try {
+    console.log('uploadSound called with:', audioFile);
+    console.log('audioFile type:', typeof audioFile);
+    console.log('Is File?', audioFile instanceof File);
+    console.log('Is Blob?', audioFile instanceof Blob);
+    
     const formData = new FormData();
-    formData.append('file', {
-      uri: audioFile.uri,
-      type: audioFile.type || 'audio/wav',
-      name: audioFile.name || 'poultry_sound.wav',
-    });
+    
+    // Handle web vs React Native file formats
+    if (audioFile instanceof File || audioFile instanceof Blob) {
+      // Web: audioFile is already a File object
+      console.log('Appending as File/Blob');
+      formData.append('file', audioFile);
+    } else {
+      // React Native: audioFile has uri, type, name properties
+      console.log('Appending as React Native object');
+      formData.append('file', {
+        uri: audioFile.uri,
+        type: audioFile.type || 'audio/wav',
+        name: audioFile.name || 'poultry_sound.wav',
+      });
+    }
 
     const config = {
       headers: {
@@ -39,6 +54,7 @@ export const uploadSound = async (audioFile, onUploadProgress = null) => {
     return response;
   } catch (error) {
     console.error('Sound upload error:', error);
+    console.error('Error response:', error.response?.data);
     throw error;
   }
 };
@@ -52,11 +68,19 @@ export const uploadSound = async (audioFile, onUploadProgress = null) => {
 export const uploadImage = async (imageFile, onUploadProgress = null) => {
   try {
     const formData = new FormData();
-    formData.append('file', {
-      uri: imageFile.uri,
-      type: imageFile.type || 'image/jpeg',
-      name: imageFile.name || 'poultry_image.jpg',
-    });
+    
+    // Handle web vs React Native file formats
+    if (imageFile instanceof File || imageFile instanceof Blob) {
+      // Web: imageFile is already a File object
+      formData.append('file', imageFile);
+    } else {
+      // React Native: imageFile has uri, type, name properties
+      formData.append('file', {
+        uri: imageFile.uri,
+        type: imageFile.type || 'image/jpeg',
+        name: imageFile.name || 'poultry_image.jpg',
+      });
+    }
 
     const config = {
       headers: {

@@ -32,13 +32,21 @@ const SoundUploadScreen = ({ navigation }) => {
         copyToCacheDirectory: true,
       });
 
+      console.log('Document picker result:', result);
+
       if (result.type === 'success' || !result.canceled) {
         const file = result.assets ? result.assets[0] : result;
-        setAudioFile({
+        console.log('Picked file:', file);
+        
+        // On web, file.file contains the actual File object
+        const fileData = Platform.OS === 'web' && file.file ? file.file : {
           uri: file.uri,
           name: file.name,
           type: file.mimeType || 'audio/wav',
-        });
+        };
+        
+        console.log('File data to upload:', fileData);
+        setAudioFile(fileData);
         setResult(null); // Reset previous result
       }
     } catch (error) {

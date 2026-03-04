@@ -8,6 +8,7 @@ import {
   ActivityIndicator,
   ScrollView,
   Image,
+  Platform,
 } from 'react-native';
 import * as ImagePicker from 'expo-image-picker';
 import { uploadImage } from '../services/poultryService';
@@ -72,11 +73,17 @@ const ImageUploadScreen = ({ navigation, route }) => {
 
       if (!result.canceled && result.assets && result.assets.length > 0) {
         const image = result.assets[0];
-        setImageFile({
+        console.log('Camera result:', image);
+        
+        // On web, extract the File object if available
+        const fileData = Platform.OS === 'web' && image.file ? image.file : {
           uri: image.uri,
           name: `poultry_${Date.now()}.jpg`,
           type: 'image/jpeg',
-        });
+        };
+        
+        console.log('Camera file data to upload:', fileData);
+        setImageFile(fileData);
         setResult(null); // Reset previous result
       }
     } catch (error) {
@@ -102,11 +109,17 @@ const ImageUploadScreen = ({ navigation, route }) => {
 
       if (!result.canceled && result.assets && result.assets.length > 0) {
         const image = result.assets[0];
-        setImageFile({
+        console.log('Gallery result:', image);
+        
+        // On web, extract the File object if available
+        const fileData = Platform.OS === 'web' && image.file ? image.file : {
           uri: image.uri,
           name: `poultry_${Date.now()}.jpg`,
           type: 'image/jpeg',
-        });
+        };
+        
+        console.log('File data to upload:', fileData);
+        setImageFile(fileData);
         setResult(null); // Reset previous result
       }
     } catch (error) {

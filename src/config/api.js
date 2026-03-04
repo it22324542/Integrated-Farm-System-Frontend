@@ -10,6 +10,13 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 // Get API URL from environment variables
 const API_BASE_URL = Constants.expoConfig?.extra?.apiUrl || 'http://localhost:5000/api';
 
+console.log('========================================');
+console.log('🔧 API CONFIGURATION LOADED');
+console.log('========================================');
+console.log('expo config apiUrl:', Constants.expoConfig?.extra?.apiUrl);
+console.log('Final API_BASE_URL:', API_BASE_URL);
+console.log('========================================');
+
 // Create Axios instance
 const apiClient = axios.create({
   baseURL: API_BASE_URL,
@@ -26,6 +33,13 @@ const apiClient = axios.create({
 apiClient.interceptors.request.use(
   async (config) => {
     try {
+      // Log the request for debugging
+      console.log('API Request:', {
+        method: config.method,
+        url: config.baseURL + config.url,
+        headers: config.headers
+      });
+      
       // Retrieve auth token from AsyncStorage
       const token = await AsyncStorage.getItem('authToken');
       
@@ -94,6 +108,15 @@ apiClient.interceptors.response.use(
     // Handle network errors
     if (!error.response) {
       console.error('Network error - no response received');
+      console.error('Error details:', {
+        message: error.message,
+        code: error.code,
+        config: error.config ? {
+          url: error.config.url,
+          baseURL: error.config.baseURL,
+          method: error.config.method
+        } : 'No config'
+      });
     }
 
     return Promise.reject(error);
