@@ -1,17 +1,21 @@
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import {
   View,
   Text,
   StyleSheet,
   TouchableOpacity,
   Alert,
-  ActivityIndicator,
   ScrollView,
   Image,
   Platform,
+  Animated,
+  Dimensions,
 } from 'react-native';
 import * as ImagePicker from 'expo-image-picker';
+import { LinearGradient } from 'expo-linear-gradient';
 import { uploadImage } from '../services/poultryService';
+
+const { width: SCREEN_WIDTH } = Dimensions.get('window');
 
 /**
  * Step 2: Image Upload Screen
@@ -20,45 +24,153 @@ import { uploadImage } from '../services/poultryService';
  */
 const ImageUploadScreen = ({ navigation, route }) => {
   const { soundPredictionId } = route.params || {};
-  
+
+  // ── Existing state (unchanged) ──────────────────────────────────────────
   const [imageFile, setImageFile] = useState(null);
   const [uploading, setUploading] = useState(false);
   const [uploadProgress, setUploadProgress] = useState(0);
   const [result, setResult] = useState(null);
 
-  /**
-   * Request camera permissions
-   */
+  // ── Toast state ─────────────────────────────────────────────────────────
+  const [toastMsg, setToastMsg] = useState('');
+  const [toastVisible, setToastVisible] = useState(false);
+
+  // ── Animation refs ───────────────────────────────────────────────────────
+  const chickenAnim    = useRef(new Animated.Value(0)).current;
+  const shimmerAnim    = useRef(new Animated.Value(-SCREEN_WIDTH)).current;
+  const stepDotAnim    = useRef(new Animated.Value(1)).current;
+  const waveBarAnims   = useRef(
+    Array.from({ length: 9 }, () => new Animated.Value(0.3))
+  ).current;
+  const dotAnims = useRef([
+    new Animated.Value(0),
+    new Animated.Value(0),
+    new Animated.Value(0),
+  ]).current;
+  const resultScaleAnim = useRef(new Animated.Value(0.8)).current;
+  const resultOpacity   = useRef(new Animated.Value(0)).current;
+  const confidenceAnim  = useRef(new Animated.Value(0)).current;
+  const toastAnim       = useRef(new Animated.Value(100)).current;
+
+  // ── Idle animations ──────────────────────────────────────────────────────
+  useEffect(() => {
+    Animated.loop(
+      Animated.sequence([
+        Animated.timing(chickenAnim, { toValue: -8, duration: 600, useNativeDriver: true }),
+        Animated.timing(chickenAnim, { toValue: 0,  duration: 600, useNativeDriver: true }),
+      ])
+    ).start();
+
+    shimmerAnim.setValue(-SCREEN_WIDTH);
+    Animated.loop(
+      Animated.timing(shimmerAnim, { toValue: SCREEN_WIDTH, duration: 1800, useNativeDriver: true })
+    ).start();
+
+    Animated.loop(
+      Animated.sequence([
+        Animated.timing(stepDotAnim, { toValue: 1.4, duration: 700, useNativeDriver: true }),
+        Animated.timing(stepDotAnim, { toValue: 1.0, duration: 700, useNativeDriver: true }),
+      ])
+    ).start();
+  }, []);
+
+  // ── Waveform + bouncing dots while uploading ─────────────────────────────
+  useEffect(() => {
+    if (uploading) {
+      waveBarAnims.forEach(a => a.setValue(0.3));
+      dotAnims.forEach(a => a.setValue(0));
+
+      const waveLoops = waveBarAnims.map(anim =>
+        Animated.loop(
+          Animated.sequence([
+            Animated.timing(anim, { toValue: 1.0, duration: 350, useNativeDriver: true }),
+            Animated.timing(anim, { toValue: 0.3, duration: 350, useNativeDriver: true }),
+          ])
+        )
+      );
+      Animated.stagger(80, waveLoops).start();
+
+      const dotLoops = dotAnims.map(anim =>
+        Animated.loop(
+          Animated.sequence([
+            Animated.timing(anim, { toValue: -7, duration: 280, useNativeDriver: true }),
+            Animated.timing(anim, { toValue: 0,  duration: 280, useNativeDriver: true }),
+          ])
+        )
+      );
+      Animated.stagger(150, dotLoops).start();
+
+      return () => {
+        waveLoops.forEach(a => a.stop());
+        dotLoops.forEach(a => a.stop());
+        waveBarAnims.forEach(a => a.setValue(0.3));
+        dotAnims.forEach(a => a.setValue(0));
+      };
+    }
+  }, [uploading]);
+
+  // ── Result entrance + confidence bar ────────────────────────────────────
+  useEffect(() => {
+    if (result) {
+      resultScaleAnim.setValue(0.8);
+      resultOpacity.setValue(0);
+      confidenceAnim.setValue(0);
+
+      Animated.parallel([
+        Animated.spring(resultScaleAnim, {
+          toValue: 1.0,
+          friction: 6,
+          tension: 100,
+          useNativeDriver: true,
+        }),
+        Animated.timing(resultOpacity, {
+          toValue: 1,
+          duration: 400,
+          useNativeDriver: true,
+        }),
+      ]).start();
+
+      const targetConfidence =
+        result.confidence != null ? result.confidence * 100 : 100;
+      Animated.timing(confidenceAnim, {
+        toValue: targetConfidence,
+        duration: 1000,
+        useNativeDriver: false,
+      }).start();
+    }
+  }, [result]);
+
+  // ── Toast helper ─────────────────────────────────────────────────────────
+  const showToast = (msg) => {
+    setToastMsg(msg);
+    setToastVisible(true);
+    toastAnim.setValue(100);
+    Animated.sequence([
+      Animated.timing(toastAnim, { toValue: 0,   duration: 300, useNativeDriver: true }),
+      Animated.delay(2200),
+      Animated.timing(toastAnim, { toValue: 100, duration: 300, useNativeDriver: true }),
+    ]).start(() => setToastVisible(false));
+  };
+
+  // ── Existing functions (unchanged) ──────────────────────────────────────
   const requestCameraPermission = async () => {
     const { status } = await ImagePicker.requestCameraPermissionsAsync();
     if (status !== 'granted') {
-      Alert.alert(
-        'Permission Required',
-        'Camera permission is required to take photos'
-      );
+      Alert.alert('Permission Required', 'Camera permission is required to take photos');
       return false;
     }
     return true;
   };
 
-  /**
-   * Request gallery permissions
-   */
   const requestGalleryPermission = async () => {
     const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
     if (status !== 'granted') {
-      Alert.alert(
-        'Permission Required',
-        'Gallery permission is required to select photos'
-      );
+      Alert.alert('Permission Required', 'Gallery permission is required to select photos');
       return false;
     }
     return true;
   };
 
-  /**
-   * Take photo with camera
-   */
   const takePhoto = async () => {
     const hasPermission = await requestCameraPermission();
     if (!hasPermission) return;
@@ -74,17 +186,17 @@ const ImageUploadScreen = ({ navigation, route }) => {
       if (!result.canceled && result.assets && result.assets.length > 0) {
         const image = result.assets[0];
         console.log('Camera result:', image);
-        
-        // On web, extract the File object if available
+
         const fileData = Platform.OS === 'web' && image.file ? image.file : {
           uri: image.uri,
           name: `poultry_${Date.now()}.jpg`,
           type: 'image/jpeg',
         };
-        
+
         console.log('Camera file data to upload:', fileData);
         setImageFile(fileData);
-        setResult(null); // Reset previous result
+        setResult(null);
+        showToast('✓ Photo captured');
       }
     } catch (error) {
       console.error('Error taking photo:', error);
@@ -92,9 +204,6 @@ const ImageUploadScreen = ({ navigation, route }) => {
     }
   };
 
-  /**
-   * Pick image from gallery
-   */
   const pickFromGallery = async () => {
     const hasPermission = await requestGalleryPermission();
     if (!hasPermission) return;
@@ -110,17 +219,17 @@ const ImageUploadScreen = ({ navigation, route }) => {
       if (!result.canceled && result.assets && result.assets.length > 0) {
         const image = result.assets[0];
         console.log('Gallery result:', image);
-        
-        // On web, extract the File object if available
+
         const fileData = Platform.OS === 'web' && image.file ? image.file : {
           uri: image.uri,
           name: `poultry_${Date.now()}.jpg`,
           type: 'image/jpeg',
         };
-        
+
         console.log('File data to upload:', fileData);
         setImageFile(fileData);
-        setResult(null); // Reset previous result
+        setResult(null);
+        showToast('✓ Image selected');
       }
     } catch (error) {
       console.error('Error picking image:', error);
@@ -128,33 +237,18 @@ const ImageUploadScreen = ({ navigation, route }) => {
     }
   };
 
-  /**
-   * Show image source picker
-   */
   const showImagePicker = () => {
     Alert.alert(
       'Select Image Source',
       'Choose where to get the poultry image from',
       [
-        {
-          text: 'Camera',
-          onPress: takePhoto,
-        },
-        {
-          text: 'Gallery',
-          onPress: pickFromGallery,
-        },
-        {
-          text: 'Cancel',
-          style: 'cancel',
-        },
+        { text: 'Camera',  onPress: takePhoto },
+        { text: 'Gallery', onPress: pickFromGallery },
+        { text: 'Cancel',  style: 'cancel' },
       ]
     );
   };
 
-  /**
-   * Upload image file and analyze
-   */
   const handleUpload = async () => {
     if (!imageFile) {
       Alert.alert('No Image', 'Please select an image first');
@@ -171,13 +265,7 @@ const ImageUploadScreen = ({ navigation, route }) => {
 
       if (response.success) {
         setResult(response);
-        
-        // Show result alert
-        Alert.alert(
-          'Analysis Complete',
-          response.message,
-          [{ text: 'OK' }]
-        );
+        Alert.alert('Analysis Complete', response.message, [{ text: 'OK' }]);
       } else {
         Alert.alert('Error', response.error || 'Upload failed');
       }
@@ -193,370 +281,706 @@ const ImageUploadScreen = ({ navigation, route }) => {
     }
   };
 
-  /**
-   * Reset and start over
-   */
   const resetUpload = () => {
     setImageFile(null);
     setResult(null);
     setUploadProgress(0);
   };
 
-  /**
-   * Go back to sound upload
-   */
   const goBackToSound = () => {
     navigation.goBack();
   };
 
-  /**
-   * Navigate to Step 3: Dropping Disease Detection
-   */
   const goToDropping = () => {
     navigation.navigate('DroppingUpload', {
       imagePredictionId: result?.prediction_id,
     });
   };
 
-  /**
-   * Get result color based on outcome
-   */
-  const getResultColor = (resultType) => {
-    return resultType === 'Healthy' ? '#4CAF50' : '#F44336';
+  // ── Display helpers ──────────────────────────────────────────────────────
+  const getResultColor = (resultType) =>
+    resultType === 'Healthy' ? '#3dba5c' : '#e53935';
+
+  const getResultMessage = (r) => {
+    if (!r) return '';
+    if (r.result === 'Healthy')
+      return '🐔 Image analysis shows healthy poultry. No further action needed.';
+    return '⚠️ Image analysis detected issues. Proceed to disease detection for detailed diagnosis.';
   };
 
+  const confidencePercent =
+    result ? (result.confidence != null ? result.confidence * 100 : 100) : 0;
+
+  // ── Render ───────────────────────────────────────────────────────────────
   return (
-    <ScrollView style={styles.container} contentContainerStyle={styles.contentContainer}>
-      <View style={styles.header}>
-        <Text style={styles.title}>Step 2: Image Analysis</Text>
-        <Text style={styles.subtitle}>
-          Upload a clear image of the poultry for detailed health assessment
-        </Text>
-      </View>
+    <View style={styles.root}>
 
-      {/* Image Picker Section */}
-      <View style={styles.section}>
-        <Text style={styles.sectionTitle}>Select Image</Text>
-        
-        {imageFile && (
-          <View style={styles.imagePreview}>
-            <Image 
-              source={{ uri: imageFile.uri }} 
-              style={styles.previewImage}
-              resizeMode="cover"
-            />
-          </View>
-        )}
+      {/* ── Sticky Header ─────────────────────────────────────────────── */}
+      <LinearGradient colors={['#1a5c2a', '#3dba5c']} style={styles.header}>
+        <Animated.Text style={[styles.headerChicken, { transform: [{ translateY: chickenAnim }] }]}>
+          🐔
+        </Animated.Text>
+        <View style={styles.headerCenter}>
+          <Text style={styles.headerTitle}>Poultry Health Detection</Text>
+        </View>
+        <View style={styles.aiBadge}>
+          <Text style={styles.aiBadgeText}>AI Powered</Text>
+        </View>
+      </LinearGradient>
 
-        <TouchableOpacity
-          style={[styles.pickButton, styles.cameraButton]}
-          onPress={takePhoto}
-          disabled={uploading}
-        >
-          <Text style={styles.pickButtonText}>📷 Camera</Text>
-        </TouchableOpacity>
+      <ScrollView
+        style={styles.scroll}
+        contentContainerStyle={styles.scrollContent}
+        showsVerticalScrollIndicator={false}
+      >
 
-        {imageFile && (
-          <View style={styles.fileInfo}>
-            <Text style={styles.fileInfoText}>Image ready for analysis</Text>
-          </View>
-        )}
-      </View>
-
-      {/* Upload Button */}
-      {imageFile && !result && (
-        <TouchableOpacity
-          style={[styles.uploadButton, uploading && styles.uploadButtonDisabled]}
-          onPress={handleUpload}
-          disabled={uploading}
-        >
-          {uploading ? (
-            <View style={styles.uploadingContainer}>
-              <ActivityIndicator color="#fff" size="small" />
-              <Text style={styles.uploadButtonText}>
-                Analyzing... {uploadProgress}%
-              </Text>
-            </View>
-          ) : (
-            <Text style={styles.uploadButtonText}>Analyze Image</Text>
-          )}
-        </TouchableOpacity>
-      )}
-
-      {/* Result Display */}
-      {result && (
-        <View style={styles.resultContainer}>
-          <Text style={styles.resultTitle}>Analysis Result</Text>
-          
-          <View
-            style={[
-              styles.resultBox,
-              { borderColor: getResultColor(result.result) },
-            ]}
-          >
-            <Text
-              style={[styles.resultText, { color: getResultColor(result.result) }]}
-            >
-              {result.result}
+        {/* ── Progress Steps Bar ──────────────────────────────────────── */}
+        <View style={styles.progressBar}>
+          <View style={[styles.stepPill, styles.stepPillDone]}>
+            <Text style={[styles.stepPillText, styles.stepPillTextDone]}>
+              ✓ 1 Sound Analysis
             </Text>
-            {result.confidence && (
-              <Text style={styles.confidenceText}>
-                Confidence: {(result.confidence * 100).toFixed(1)}%
-              </Text>
-            )}
           </View>
-
-          <Text style={styles.resultMessage}>{result.message}</Text>
-          {/* Proceed to Step 3 when Unhealthy */}
-          {result.result === 'Unhealthy' && (
-            <TouchableOpacity
-              style={styles.proceedButton}
-              onPress={goToDropping}
-            >
-              <Text style={styles.proceedButtonText}>🔬 Proceed to Disease Detection (Step 3)</Text>
-            </TouchableOpacity>
-          )}
-          {/* Action Buttons */}
-          <View style={styles.buttonRow}>
-            <TouchableOpacity
-              style={[styles.actionButton, styles.resetButton]}
-              onPress={resetUpload}
-            >
-              <Text style={styles.actionButtonText}>Analyze Another</Text>
-            </TouchableOpacity>
-
-            <TouchableOpacity
-              style={[styles.actionButton, styles.backButton]}
-              onPress={goBackToSound}
-            >
-              <Text style={styles.actionButtonText}>Back to Sound</Text>
-            </TouchableOpacity>
+          <View style={styles.stepConnector} />
+          <View style={[styles.stepPill, styles.stepPillActive]}>
+            <Text style={[styles.stepPillText, styles.stepPillTextActive]}>
+              2 Image Analysis
+            </Text>
+          </View>
+          <View style={styles.stepConnector} />
+          <View style={styles.stepPill}>
+            <Text style={styles.stepPillText}>3 Health Report</Text>
           </View>
         </View>
-      )}
 
-      {/* Instructions */}
-      <View style={styles.instructions}>
-        <Text style={styles.instructionsTitle}>Instructions:</Text>
-        <Text style={styles.instructionsText}>
-          1. Take a clear photo or select from gallery{'\n'}
-          2. Ensure good lighting and the poultry is visible{'\n'}
-          3. Avoid blurry or dark images{'\n'}
-          4. Supported formats: JPEG, PNG{'\n'}
-          5. The system will analyze visual health indicators
-        </Text>
-      </View>
-
-      {soundPredictionId && (
-        <View style={styles.linkedInfo}>
-          <Text style={styles.linkedInfoText}>
-            📎 Linked to sound analysis: {soundPredictionId.substring(0, 8)}...
+        {/* ── Step Header ─────────────────────────────────────────────── */}
+        <View style={styles.stepHeader}>
+          <View style={styles.stepTagRow}>
+            <Animated.View style={[styles.stepDot, { transform: [{ scale: stepDotAnim }] }]} />
+            <Text style={styles.stepTag}>Step 2 of 3</Text>
+          </View>
+          <Text style={styles.stepTitle}>Image Analysis</Text>
+          <Text style={styles.stepSubtitle}>
+            Upload a clear image of the poultry for detailed health assessment
           </Text>
         </View>
+
+        {/* ── Image Upload Card ────────────────────────────────────────── */}
+        <View style={styles.card}>
+          <View style={styles.cardTopAccent} />
+          <Text style={styles.cardTitle}>📷 Select Poultry Image</Text>
+
+          {/* Image preview */}
+          {imageFile && (
+            <View style={styles.imagePreview}>
+              <Image
+                source={{ uri: imageFile.uri }}
+                style={styles.previewImage}
+                resizeMode="cover"
+              />
+            </View>
+          )}
+
+          {/* Camera button */}
+          <TouchableOpacity
+            style={[styles.pickerBtn, styles.cameraBtn]}
+            onPress={takePhoto}
+            disabled={uploading}
+            activeOpacity={0.82}
+          >
+            <Text style={styles.pickerBtnText}>📷 Camera</Text>
+          </TouchableOpacity>
+
+          {imageFile && (
+            <View style={styles.fileInfoRow}>
+              <View style={styles.fileCheckBadge}>
+                <Text style={styles.fileCheckBadgeText}>✓</Text>
+              </View>
+              <Text style={styles.fileInfoText}>Image ready for analysis</Text>
+            </View>
+          )}
+        </View>
+
+        {/* ── Analyze Button with shimmer ──────────────────────────────── */}
+        {imageFile && !uploading && !result && (
+          <TouchableOpacity
+            onPress={handleUpload}
+            activeOpacity={0.88}
+            style={styles.analyzeWrapper}
+          >
+            <LinearGradient colors={['#2d8c45', '#1a5c2a']} style={styles.analyzeBtn}>
+              <Animated.View
+                style={[styles.shimmer, { transform: [{ translateX: shimmerAnim }] }]}
+                pointerEvents="none"
+              />
+              <Text style={styles.analyzeBtnText}>🔬  Analyze Image</Text>
+            </LinearGradient>
+          </TouchableOpacity>
+        )}
+
+        {/* ── Waveform Loading State ───────────────────────────────────── */}
+        {uploading && (
+          <View style={styles.loadingCard}>
+            <View style={styles.waveform}>
+              {waveBarAnims.map((anim, i) => (
+                <Animated.View
+                  key={i}
+                  style={[styles.waveBar, { transform: [{ scaleY: anim }] }]}
+                />
+              ))}
+            </View>
+            <Text style={styles.loadingText}>Analyzing poultry image...</Text>
+            <View style={styles.bounceDots}>
+              {dotAnims.map((anim, i) => (
+                <Animated.View
+                  key={i}
+                  style={[styles.bounceDot, { transform: [{ translateY: anim }] }]}
+                />
+              ))}
+            </View>
+          </View>
+        )}
+
+        {/* ── Result Card ─────────────────────────────────────────────── */}
+        {result && (
+          <Animated.View
+            style={[
+              styles.resultCard,
+              { borderColor: getResultColor(result.result) },
+              { transform: [{ scale: resultScaleAnim }], opacity: resultOpacity },
+            ]}
+          >
+            <Text style={[styles.resultLabel, { color: getResultColor(result.result) }]}>
+              {result.result}
+            </Text>
+
+            <View style={styles.confBarTrack}>
+              <Animated.View
+                style={[
+                  styles.confBarFill,
+                  { backgroundColor: getResultColor(result.result) },
+                  {
+                    width: confidenceAnim.interpolate({
+                      inputRange: [0, 100],
+                      outputRange: ['0%', '100%'],
+                      extrapolate: 'clamp',
+                    }),
+                  },
+                ]}
+              />
+            </View>
+            <Text style={styles.confLabel}>
+              Confidence: {confidencePercent.toFixed(1)}%
+            </Text>
+
+            <Text style={styles.resultMessage}>{getResultMessage(result)}</Text>
+
+            {/* Proceed to Step 3 when Unhealthy */}
+            {result.result === 'Unhealthy' && (
+              <TouchableOpacity
+                style={styles.proceedBtn}
+                onPress={goToDropping}
+                activeOpacity={0.85}
+              >
+                <Text style={styles.proceedBtnText}>🔬 Next: Disease Detection →</Text>
+              </TouchableOpacity>
+            )}
+
+            <View style={styles.resultBtns}>
+              <TouchableOpacity style={styles.resetBtn} onPress={resetUpload} activeOpacity={0.8}>
+                <Text style={styles.resetBtnText}>↺ Analyze Another</Text>
+              </TouchableOpacity>
+              <TouchableOpacity style={styles.backBtn} onPress={goBackToSound} activeOpacity={0.8}>
+                <Text style={styles.backBtnText}>← Back to Sound</Text>
+              </TouchableOpacity>
+            </View>
+          </Animated.View>
+        )}
+
+        {/* ── Instructions ─────────────────────────────────────────────── */}
+        <View style={styles.instructionsBox}>
+          <Text style={styles.instructionsTitle}>💡 Instructions</Text>
+          {[
+            'Take a clear photo or select from gallery',
+            'Ensure good lighting and the poultry is clearly visible',
+            'Avoid blurry or dark images for best accuracy',
+            'Supported formats: JPEG, PNG',
+            'The system will analyze visual health indicators',
+          ].map((item, i) => (
+            <View key={i} style={styles.instructionItem}>
+              <View style={styles.instrNumBadge}>
+                <Text style={styles.instrNumText}>{i + 1}</Text>
+              </View>
+              <Text style={styles.instructionText}>{item}</Text>
+            </View>
+          ))}
+        </View>
+
+      </ScrollView>
+
+      {/* ── Toast ───────────────────────────────────────────────────────── */}
+      {toastVisible && (
+        <Animated.View style={[styles.toast, { transform: [{ translateY: toastAnim }] }]}>
+          <Text style={styles.toastText}>{toastMsg}</Text>
+        </Animated.View>
       )}
-    </ScrollView>
+
+    </View>
   );
 };
 
 const styles = StyleSheet.create({
-  container: {
+  // ── Root ─────────────────────────────────────────────────────────────────
+  root: {
     flex: 1,
-    backgroundColor: '#f5f5f5',
+    backgroundColor: '#f7fdf9',
   },
-  contentContainer: {
-    padding: 20,
-  },
+
+  // ── Header ───────────────────────────────────────────────────────────────
   header: {
-    marginBottom: 30,
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingTop: Platform.OS === 'ios' ? 52 : 36,
+    paddingBottom: 16,
+    paddingHorizontal: 18,
   },
-  title: {
-    fontSize: 28,
+  headerChicken: {
+    fontSize: 32,
+    marginRight: 10,
+  },
+  headerCenter: {
+    flex: 1,
+  },
+  headerTitle: {
+    fontFamily: 'PlayfairDisplay-Bold',
+    fontSize: 18,
     fontWeight: 'bold',
-    color: '#333',
+    color: '#ffffff',
+  },
+  aiBadge: {
+    backgroundColor: 'rgba(255,255,255,0.22)',
+    borderRadius: 20,
+    paddingHorizontal: 10,
+    paddingVertical: 4,
+    borderWidth: 1,
+    borderColor: 'rgba(255,255,255,0.5)',
+    marginLeft: 8,
+  },
+  aiBadgeText: {
+    color: '#ffffff',
+    fontSize: 11,
+    fontFamily: 'Nunito-Bold',
+    fontWeight: '700',
+  },
+
+  // ── Scroll ───────────────────────────────────────────────────────────────
+  scroll: {
+    flex: 1,
+  },
+  scrollContent: {
+    padding: 18,
+    paddingBottom: 48,
+  },
+
+  // ── Progress Bar ─────────────────────────────────────────────────────────
+  progressBar: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 22,
+    marginTop: 4,
+  },
+  stepPill: {
+    flex: 1,
+    backgroundColor: '#e0ede3',
+    borderRadius: 20,
+    paddingVertical: 7,
+    paddingHorizontal: 4,
+    alignItems: 'center',
+  },
+  stepPillDone: {
+    backgroundColor: '#a5d6b0',
+  },
+  stepPillActive: {
+    backgroundColor: '#2d8c45',
+  },
+  stepPillText: {
+    fontSize: 10,
+    color: '#6a8a70',
+    fontFamily: 'Nunito-Bold',
+    fontWeight: '700',
+    textAlign: 'center',
+  },
+  stepPillTextDone: {
+    color: '#1a5c2a',
+  },
+  stepPillTextActive: {
+    color: '#ffffff',
+  },
+  stepConnector: {
+    height: 2,
+    width: 10,
+    backgroundColor: '#c5dec8',
+  },
+
+  // ── Step Header ──────────────────────────────────────────────────────────
+  stepHeader: {
+    marginBottom: 20,
+  },
+  stepTagRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
     marginBottom: 8,
   },
-  subtitle: {
+  stepDot: {
+    width: 10,
+    height: 10,
+    borderRadius: 5,
+    backgroundColor: '#3dba5c',
+    marginRight: 8,
+  },
+  stepTag: {
+    fontSize: 13,
+    color: '#2d8c45',
+    fontFamily: 'Nunito-Bold',
+    fontWeight: '700',
+    letterSpacing: 0.4,
+  },
+  stepTitle: {
+    fontFamily: 'PlayfairDisplay-Black',
+    fontSize: 30,
+    fontWeight: '900',
+    color: '#1a5c2a',
+    marginBottom: 6,
+  },
+  stepSubtitle: {
+    fontSize: 14,
+    color: '#7a9a80',
+    fontFamily: 'Nunito-Bold',
+    lineHeight: 20,
+  },
+
+  // ── Upload Card ──────────────────────────────────────────────────────────
+  card: {
+    backgroundColor: '#ffffff',
+    borderRadius: 20,
+    padding: 22,
+    marginBottom: 18,
+    shadowColor: '#1a5c2a',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.09,
+    shadowRadius: 12,
+    elevation: 4,
+    overflow: 'hidden',
+  },
+  cardTopAccent: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    height: 4,
+    backgroundColor: '#3dba5c',
+  },
+  cardTitle: {
+    fontFamily: 'Nunito-ExtraBold',
     fontSize: 16,
-    color: '#666',
-    lineHeight: 22,
-  },
-  section: {
-    backgroundColor: '#fff',
-    borderRadius: 12,
-    padding: 20,
-    marginBottom: 20,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 3,
-  },
-  sectionTitle: {
-    fontSize: 18,
-    fontWeight: '600',
-    color: '#333',
-    marginBottom: 15,
+    fontWeight: '800',
+    color: '#1a5c2a',
+    marginTop: 8,
+    marginBottom: 16,
   },
   imagePreview: {
     width: '100%',
-    height: 250,
-    borderRadius: 12,
+    height: 220,
+    borderRadius: 14,
     overflow: 'hidden',
-    marginBottom: 15,
-    backgroundColor: '#f0f0f0',
+    marginBottom: 16,
+    backgroundColor: '#e8f5e9',
   },
   previewImage: {
     width: '100%',
     height: '100%',
   },
-  buttonRow: {
+  pickerRow: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
+    gap: 12,
   },
-  pickButton: {
-    borderRadius: 8,
-    padding: 15,
+  pickerBtn: {
+    flex: 1,
+    borderRadius: 12,
+    paddingVertical: 14,
     alignItems: 'center',
   },
-  cameraButton: {
-    backgroundColor: '#FF5722',
+  cameraBtn: {
+    backgroundColor: '#F97316',
   },
-  galleryButton: {
-    backgroundColor: '#2196F3',
+  galleryBtn: {
+    backgroundColor: '#F97316',
   },
-  pickButtonText: {
-    color: '#fff',
-    fontSize: 16,
-    fontWeight: '600',
+  pickerBtnText: {
+    color: '#ffffff',
+    fontFamily: 'Nunito-Bold',
+    fontWeight: '700',
+    fontSize: 15,
   },
-  fileInfo: {
-    marginTop: 15,
-    padding: 12,
+  fileInfoRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
     backgroundColor: '#E8F5E9',
-    borderRadius: 8,
+    borderRadius: 10,
+    marginTop: 14,
+    padding: 12,
+  },
+  fileCheckBadge: {
+    width: 22,
+    height: 22,
+    borderRadius: 11,
+    backgroundColor: '#2d8c45',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginRight: 10,
+  },
+  fileCheckBadgeText: {
+    color: '#ffffff',
+    fontSize: 13,
+    fontWeight: 'bold',
   },
   fileInfoText: {
-    color: '#2E7D32',
-    fontSize: 14,
-    textAlign: 'center',
+    color: '#2d8c45',
+    fontSize: 13,
+    flex: 1,
+    fontFamily: 'Nunito-Bold',
+    fontWeight: '700',
   },
-  uploadButton: {
-    backgroundColor: '#4CAF50',
-    borderRadius: 12,
-    padding: 18,
+
+  // ── Analyze Button ────────────────────────────────────────────────────────
+  analyzeWrapper: {
+    borderRadius: 16,
+    overflow: 'hidden',
+    marginBottom: 18,
+  },
+  analyzeBtn: {
+    paddingVertical: 18,
     alignItems: 'center',
-    marginBottom: 20,
+    justifyContent: 'center',
+    overflow: 'hidden',
   },
-  uploadButtonDisabled: {
-    backgroundColor: '#A5D6A7',
+  shimmer: {
+    position: 'absolute',
+    top: 0,
+    bottom: 0,
+    width: 60,
+    backgroundColor: 'rgba(255,255,255,0.28)',
   },
-  uploadingContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  uploadButtonText: {
-    color: '#fff',
+  analyzeBtnText: {
+    color: '#ffffff',
     fontSize: 18,
-    fontWeight: 'bold',
-    marginLeft: 10,
+    fontFamily: 'Nunito-ExtraBold',
+    fontWeight: '800',
+    letterSpacing: 0.3,
   },
-  resultContainer: {
-    backgroundColor: '#fff',
-    borderRadius: 12,
-    padding: 20,
-    marginBottom: 20,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
+
+  // ── Loading / Waveform ────────────────────────────────────────────────────
+  loadingCard: {
+    backgroundColor: '#ffffff',
+    borderRadius: 20,
+    padding: 30,
+    alignItems: 'center',
+    marginBottom: 18,
+    shadowColor: '#1a5c2a',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.08,
+    shadowRadius: 10,
     elevation: 3,
   },
-  resultTitle: {
-    fontSize: 20,
-    fontWeight: 'bold',
-    color: '#333',
-    marginBottom: 15,
-  },
-  resultBox: {
-    borderWidth: 3,
-    borderRadius: 12,
-    padding: 20,
+  waveform: {
+    flexDirection: 'row',
     alignItems: 'center',
-    marginBottom: 15,
+    height: 60,
+    marginBottom: 16,
+    gap: 5,
   },
-  resultText: {
-    fontSize: 32,
+  waveBar: {
+    width: 8,
+    height: 50,
+    backgroundColor: '#3dba5c',
+    borderRadius: 4,
+  },
+  loadingText: {
+    fontSize: 15,
+    color: '#1a5c2a',
+    fontFamily: 'Nunito-Bold',
+    fontWeight: '700',
+    marginBottom: 12,
+  },
+  bounceDots: {
+    flexDirection: 'row',
+    gap: 6,
+  },
+  bounceDot: {
+    width: 9,
+    height: 9,
+    borderRadius: 4.5,
+    backgroundColor: '#3dba5c',
+  },
+
+  // ── Result Card ───────────────────────────────────────────────────────────
+  resultCard: {
+    backgroundColor: '#ffffff',
+    borderRadius: 20,
+    borderWidth: 2.5,
+    padding: 24,
+    marginBottom: 18,
+    shadowColor: '#000000',
+    shadowOffset: { width: 0, height: 6 },
+    shadowOpacity: 0.1,
+    shadowRadius: 14,
+    elevation: 5,
+  },
+  resultLabel: {
+    fontFamily: 'PlayfairDisplay-Bold',
+    fontSize: 36,
     fontWeight: 'bold',
+    textAlign: 'center',
+    marginBottom: 16,
   },
-  confidenceText: {
-    fontSize: 16,
-    color: '#666',
-    marginTop: 8,
+  confBarTrack: {
+    height: 10,
+    backgroundColor: '#e8f5e9',
+    borderRadius: 5,
+    overflow: 'hidden',
+    marginBottom: 6,
+  },
+  confBarFill: {
+    height: '100%',
+    borderRadius: 5,
+  },
+  confLabel: {
+    fontSize: 13,
+    color: '#777777',
+    textAlign: 'right',
+    marginBottom: 14,
+    fontFamily: 'Nunito-Bold',
+    fontWeight: '700',
   },
   resultMessage: {
-    fontSize: 16,
-    color: '#666',
+    fontSize: 14,
+    color: '#555555',
     textAlign: 'center',
-    marginBottom: 20,
     lineHeight: 22,
-  },
-  actionButton: {
-    flex: 1,
-    borderRadius: 8,
-    padding: 15,
-    alignItems: 'center',
-    marginHorizontal: 5,
-  },
-  resetButton: {
-    backgroundColor: '#FF9800',
-  },
-  backButton: {
-    backgroundColor: '#757575',
-  },
-  actionButtonText: {
-    color: '#fff',
-    fontSize: 16,
+    marginBottom: 16,
+    fontFamily: 'Nunito-Bold',
     fontWeight: '600',
   },
-  instructions: {
-    backgroundColor: '#E1F5FE',
-    borderRadius: 12,
-    padding: 20,
-    marginTop: 10,
-  },
-  instructionsTitle: {
-    fontSize: 16,
-    fontWeight: 'bold',
-    color: '#01579B',
-    marginBottom: 10,
-  },
-  instructionsText: {
-    fontSize: 14,
-    color: '#01579B',
-    lineHeight: 20,
-  },
-  linkedInfo: {
-    backgroundColor: '#F3E5F5',
-    borderRadius: 8,
-    padding: 15,
-    marginTop: 15,
-  },
-  linkedInfoText: {
-    fontSize: 12,
-    color: '#6A1B9A',
-    textAlign: 'center',
-  },
-  proceedButton: {
+  proceedBtn: {
     backgroundColor: '#7B1FA2',
     borderRadius: 12,
-    padding: 16,
+    paddingVertical: 14,
     alignItems: 'center',
     marginBottom: 14,
   },
-  proceedButtonText: {
-    color: '#fff',
-    fontSize: 16,
+  proceedBtnText: {
+    color: '#ffffff',
+    fontFamily: 'Nunito-Bold',
+    fontWeight: '700',
+    fontSize: 15,
+  },
+  resultBtns: {
+    flexDirection: 'row',
+    gap: 10,
+  },
+  resetBtn: {
+    flex: 1,
+    backgroundColor: '#FF9800',
+    borderRadius: 10,
+    paddingVertical: 13,
+    alignItems: 'center',
+  },
+  resetBtnText: {
+    color: '#ffffff',
+    fontFamily: 'Nunito-Bold',
+    fontWeight: '700',
+    fontSize: 14,
+  },
+  backBtn: {
+    flex: 1,
+    backgroundColor: '#757575',
+    borderRadius: 10,
+    paddingVertical: 13,
+    alignItems: 'center',
+  },
+  backBtnText: {
+    color: '#ffffff',
+    fontFamily: 'Nunito-Bold',
+    fontWeight: '700',
+    fontSize: 14,
+  },
+
+  // ── Instructions ──────────────────────────────────────────────────────────
+  instructionsBox: {
+    backgroundColor: '#fff8e1',
+    borderRadius: 16,
+    borderWidth: 1.5,
+    borderColor: '#ffca28',
+    padding: 18,
+    marginTop: 4,
+  },
+  instructionsTitle: {
+    fontFamily: 'Nunito-ExtraBold',
+    fontSize: 15,
+    fontWeight: '800',
+    color: '#e65100',
+    marginBottom: 14,
+  },
+  instructionItem: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    marginBottom: 12,
+  },
+  instrNumBadge: {
+    width: 24,
+    height: 24,
+    borderRadius: 12,
+    backgroundColor: '#ff6d00',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginRight: 10,
+    marginTop: 1,
+  },
+  instrNumText: {
+    color: '#ffffff',
+    fontSize: 12,
     fontWeight: 'bold',
+  },
+  instructionText: {
+    flex: 1,
+    fontSize: 13.5,
+    color: '#bf360c',
+    lineHeight: 20,
+    fontFamily: 'Nunito-Bold',
+    fontWeight: '600',
+  },
+
+  // ── Toast ─────────────────────────────────────────────────────────────────
+  toast: {
+    position: 'absolute',
+    bottom: 30,
+    left: 20,
+    right: 20,
+    backgroundColor: '#1a5c2a',
+    borderRadius: 12,
+    padding: 14,
+    alignItems: 'center',
+    shadowColor: '#000000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 8,
+    elevation: 8,
+  },
+  toastText: {
+    color: '#ffffff',
+    fontFamily: 'Nunito-Bold',
+    fontWeight: '700',
+    fontSize: 14,
   },
 });
 
