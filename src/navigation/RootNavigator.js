@@ -38,7 +38,7 @@ const RootNavigator = () => {
           name="SoundUpload" 
           component={SoundUploadScreen}
           options={{ 
-            title: 'Poultry Health Detection',
+            headerShown: false,
             headerLeft: null, // Prevent back navigation on first screen
           }}
         />
