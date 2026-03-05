@@ -1,4 +1,4 @@
-﻿import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import {
   View,
   Text,
@@ -11,8 +11,6 @@ import {
   Platform,
   Animated,
   Dimensions,
-  Easing,
-  Pressable,
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import * as ImagePicker from 'expo-image-picker';
@@ -20,17 +18,17 @@ import { uploadDropping } from '../services/poultryService';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 
-// ─────────────────────────────────────────────────────────────────────────────────
+// ---------------------------------------------------------------------------------
 // PREVENTION STEP IMAGES
 // Save the 5 provided images to assets/prevention-steps/ with these exact names:
-//   step1.jpg  – person washing hands        (Step 1 – Hygiene)
-//   step2.jpg  – colour-coded clothing room  (Step 2 – Colour System)
-//   step3.jpg  – spraying disinfectant       (Step 3 – Clean & Disinfect)
-//   step4.jpg  – chicks at drinking nipple   (Step 4 – Water)
-//   step5.jpg  – person adding DryGard       (Step 5 – Dry Environment)
-// ─────────────────────────────────────────────────────────────────────────────────
+//   step1.jpg  � person washing hands        (Step 1 � Hygiene)
+//   step2.jpg  � colour-coded clothing room  (Step 2 � Colour System)
+//   step3.jpg  � spraying disinfectant       (Step 3 � Clean & Disinfect)
+//   step4.jpg  � chicks at drinking nipple   (Step 4 � Water)
+//   step5.jpg  � person adding DryGard       (Step 5 � Dry Environment)
+// ---------------------------------------------------------------------------------
 const STEP_IMAGES = [
-  null,                                                                          // index 0 – unused
+  null,                                                                          // index 0 � unused
   require('../../assets/prevention-steps/Coccidiosisstep1.png'),                 // Step 1
   require('../../assets/prevention-steps/Coccidiosisstep2.png'),                 // Step 2
   require('../../assets/prevention-steps/Coccidiosisstep3.png'),                 // Step 3
@@ -54,37 +52,17 @@ const NEWCASTLE_IMAGES = [
   require('../../assets/prevention-steps/Newcastlestep5.png'),
 ];
 
-// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+// ═══════════════════════════════════════════════════════════════════════════
 // DESIGN TOKENS
-// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
-const COLORS = {
-  bg:           '#071A0D',
-  bgCard:       '#0D2818',
-  bgCardLight:  '#152E1C',
-  border:       '#1E4D2B',
-  borderActive: '#16A34A',
-  primary:      '#16A34A',
-  primaryLight: '#4ADE80',
-  primaryDark:  '#15803D',
-  cyan:         '#86EFAC',
-  cyanLight:    '#BBF7D0',
-  success:      '#10B981',
-  successLight: '#6EE7B7',
-  danger:       '#EF4444',
-  dangerLight:  '#FCA5A5',
-  warning:      '#F59E0B',
-  text:         '#FFFFFF',
-  textMuted:    '#BBF7D0',
-  textFaint:    '#6EE7B7',
-  white:        '#FFFFFF',
-};
+// ═══════════════════════════════════════════════════════════════════════════
 
-// â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+
+// ─────────────────────────────────────────────────────────────────────────────
 // Disease information database
 // Content sourced from msschippers.com with user-provided treatment summaries
-// â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ─────────────────────────────────────────────────────────────────────────────
 const DISEASE_INFO = {
-  // â”€â”€ Salmonella Disease â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+  // ── Salmonella Disease ────────────────────────────────────────────────────
   salmo: {
     name: 'Salmonella Disease',
     color: '#EF4444',
@@ -126,7 +104,7 @@ const DISEASE_INFO = {
     ],
     criticalNotes: [
       'Salmonella Pullorum (pullorum disease) is often treated with eradication, not medication, due to its high mortality.',
-      'Salmonella in meat is eliminated by cooking to an internal temperature of 165Â°F (74Â°C).',
+      'Salmonella in meat is eliminated by cooking to an internal temperature of 165°F (74°C).',
     ],
     causes: {
       title: 'What Causes Salmonellosis in Poultry?',
@@ -142,11 +120,11 @@ const DISEASE_INFO = {
     spread: {
       title: 'How Does Salmonellosis Spread?',
       points: [
-        'Contaminated Feed and Water – the most common transmission route.',
-        'Infected Equipment – tools, cages, or clothing that have been contaminated.',
-        'Rodents and Insects – rats, mice, lesser mealworm, and red mites can act as vectors.',
-        'Visitors – contaminated clothing, footwear, or equipment.',
-        'Transport Vehicles – animal transport and feed providers can spread bacteria farm-to-farm.',
+        'Contaminated Feed and Water � the most common transmission route.',
+        'Infected Equipment � tools, cages, or clothing that have been contaminated.',
+        'Rodents and Insects � rats, mice, lesser mealworm, and red mites can act as vectors.',
+        'Visitors � contaminated clothing, footwear, or equipment.',
+        'Transport Vehicles � animal transport and feed providers can spread bacteria farm-to-farm.',
       ],
     },
     symptoms: {
@@ -215,7 +193,7 @@ const DISEASE_INFO = {
     sourceUrl: 'https://www.msschippers.com/en-EU/advice/the-5-steps-to-prevent-salmonellosis-in-poultry',
   },
 
-  // â”€â”€ Newcastle Disease â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+  // ── Newcastle Disease ─────────────────────────────────────────────────────
   ncd: {
     name: 'Newcastle Disease',
     color: '#F59E0B',
@@ -229,7 +207,7 @@ const DISEASE_INFO = {
       {
         heading: 'Vaccination (Best Prevention)',
         body:
-          'Use vaccines like the I-2 Newcastle vaccine, which is thermostable, every 3–4 months.',
+          'Use vaccines like the I-2 Newcastle vaccine, which is thermostable, every 3�4 months.',
       },
       {
         heading: 'Supportive Care',
@@ -343,7 +321,7 @@ const DISEASE_INFO = {
       'https://www.msschippers.com/en-EU/advice/the-5-steps-to-prevent-newcastle-disease-in-chickens',
   },
 
-  // â”€â”€ Coccidiosis Disease â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+  // ── Coccidiosis Disease ───────────────────────────────────────────────────
   cocci: {
     name: 'Coccidiosis Disease',
     color: '#F97316',
@@ -376,7 +354,7 @@ const DISEASE_INFO = {
     ],
     criticalNotes: [
       'Vaccination is often used for broiler breeders to build immunity.',
-      'Maintain dry litter – Coccidia thrives in wet, warm conditions.',
+      'Maintain dry litter � Coccidia thrives in wet, warm conditions.',
       'Rotate between different types of coccidiostats (ionophores and synthetics) to prevent resistance.',
       'Some herbal extracts (e.g., Artemisia annua) may help reduce parasite shedding.',
     ],
@@ -467,7 +445,7 @@ const DISEASE_INFO = {
       'https://www.msschippers.com/en-EU/advice/the-5-steps-to-prevent-coccidiosis-in-chickens',
   },
 
-  // â”€â”€ Healthy â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+  // ── Healthy ───────────────────────────────────────────────────────────────
   healthy: {
     name: 'Healthy Poultry',
     color: '#10B981',
@@ -475,36 +453,14 @@ const DISEASE_INFO = {
   },
 };
 
-// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+// ═══════════════════════════════════════════════════════════════════════════════
 // HELPERS
-// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+// ═══════════════════════════════════════════════════════════════════════════════
 const openLink = (url) => {
   Linking.canOpenURL(url).then((supported) => { if (supported) Linking.openURL(url); });
 };
 
-// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
-// REUSABLE ANIMATED PRESS BUTTON
-// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
-const AnimatedPressable = ({ onPress, style, children, disabled }) => {
-  const scale = useRef(new Animated.Value(1)).current;
-  const onPressIn = () => Animated.spring(scale, { toValue: 0.95, useNativeDriver: true, speed: 50, bounciness: 0 }).start();
-  const onPressOut = () => Animated.spring(scale, { toValue: 1, useNativeDriver: true, speed: 30, bounciness: 8 }).start();
-  return (
-    <Pressable
-      onPress={onPress}
-      onPressIn={onPressIn}
-      onPressOut={onPressOut}
-      disabled={disabled}
-      android_ripple={{ color: 'rgba(234, 88, 12, 0.25)', borderless: false }}
-    >
-      <Animated.View style={[style, { transform: [{ scale }] }]}>{children}</Animated.View>
-    </Pressable>
-  );
-};
-
-// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
-// ANIMATED CONFIDENCE BAR
-// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+// -- Animated confidence bar ----------------------------------------------------
 const ConfidenceBar = ({ label, value, color }) => {
   const barAnim = useRef(new Animated.Value(0)).current;
   useEffect(() => {
@@ -512,7 +468,6 @@ const ConfidenceBar = ({ label, value, color }) => {
       toValue: value,
       duration: 1000,
       delay: 300,
-      easing: Easing.out(Easing.cubic),
       useNativeDriver: false,
     }).start();
   }, [value]);
@@ -530,83 +485,7 @@ const ConfidenceBar = ({ label, value, color }) => {
   );
 };
 
-// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
-// SCANNING LINE OVERLAY
-// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
-const ScanOverlay = ({ imageHeight }) => {
-  const scanY = useRef(new Animated.Value(0)).current;
-  useEffect(() => {
-    const loop = Animated.loop(
-      Animated.sequence([
-        Animated.timing(scanY, { toValue: imageHeight - 4, duration: 1800, easing: Easing.inOut(Easing.quad), useNativeDriver: true }),
-        Animated.timing(scanY, { toValue: 0, duration: 1800, easing: Easing.inOut(Easing.quad), useNativeDriver: true }),
-      ])
-    );
-    loop.start();
-    return () => loop.stop();
-  }, [imageHeight]);
-  return (
-    <View style={StyleSheet.absoluteFillObject} pointerEvents="none">
-      <Animated.View style={[styles.scanLine, { transform: [{ translateY: scanY }] }]} />
-    </View>
-  );
-};
-
-// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
-// PULSING DOT
-// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
-const PulsingDot = ({ color = COLORS.cyan, size = 10, delay = 0 }) => {
-  const pulse = useRef(new Animated.Value(0.3)).current;
-  useEffect(() => {
-    const anim = Animated.loop(
-      Animated.sequence([
-        Animated.delay(delay),
-        Animated.timing(pulse, { toValue: 1, duration: 600, useNativeDriver: true }),
-        Animated.timing(pulse, { toValue: 0.3, duration: 600, useNativeDriver: true }),
-      ])
-    );
-    anim.start();
-    return () => anim.stop();
-  }, []);
-  return (
-    <Animated.View style={{ width: size, height: size, borderRadius: size / 2, backgroundColor: color, opacity: pulse, marginHorizontal: 3 }} />
-  );
-};
-
-// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
-// BACKGROUND ORB
-// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
-const BackgroundOrb = ({ x, y, size, color, delay = 0 }) => {
-  const scale   = useRef(new Animated.Value(0.8)).current;
-  const opacity = useRef(new Animated.Value(0.06)).current;
-  useEffect(() => {
-    const anim = Animated.loop(
-      Animated.sequence([
-        Animated.delay(delay),
-        Animated.parallel([
-          Animated.timing(scale,   { toValue: 1.2, duration: 3000, easing: Easing.inOut(Easing.sin), useNativeDriver: true }),
-          Animated.timing(opacity, { toValue: 0.12, duration: 3000, easing: Easing.inOut(Easing.sin), useNativeDriver: true }),
-        ]),
-        Animated.parallel([
-          Animated.timing(scale,   { toValue: 0.8, duration: 3000, easing: Easing.inOut(Easing.sin), useNativeDriver: true }),
-          Animated.timing(opacity, { toValue: 0.06, duration: 3000, easing: Easing.inOut(Easing.sin), useNativeDriver: true }),
-        ]),
-      ])
-    );
-    anim.start();
-    return () => anim.stop();
-  }, []);
-  return (
-    <Animated.View
-      pointerEvents="none"
-      style={{ position: 'absolute', left: x - size / 2, top: y - size / 2, width: size, height: size, borderRadius: size / 2, backgroundColor: color, opacity, transform: [{ scale }] }}
-    />
-  );
-};
-
-// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
-// DISEASE DETAIL SUB-COMPONENTS
-// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+// -- Disease detail sub-components ---------------------------------------------
 const SectionCard = ({ children, style }) => (
   <View style={[styles.sectionCard, style]}>{children}</View>
 );
@@ -633,19 +512,12 @@ const TreatmentItem = ({ heading, body }) => (
   </View>
 );
 
-// ─────────────────────────────────────────────────────────────────────────────────
-// PREVENTION STEPS – alternating text / image card layout
-// ─────────────────────────────────────────────────────────────────────────────────
-const PS_GREEN       = '#1A5C2A';
-const PS_GREEN_LIGHT = '#22703A';
-const PS_LINK_COLOR  = '#4CAF50';
-
+// -- Prevention step card (alternating image/text layout) ----------------------
 const PreventionStepCard = ({ step, heading, body, image }) => {
-  const isOdd = step % 2 !== 0; // odd → text left / image right; even → image left / text right
+  const isOdd = step % 2 !== 0;
 
   const TextPanel = () => (
     <View style={styles.psTextPanel}>
-      {/* Step badge */}
       <View style={styles.psStepBadge}>
         <Text style={styles.psStepBadgeText}>Step {step}</Text>
       </View>
@@ -659,17 +531,16 @@ const PreventionStepCard = ({ step, heading, body, image }) => {
       {image ? (
         <Image source={image} style={styles.psStepImage} resizeMode="cover" />
       ) : (
-        <View style={[styles.psStepImage, { backgroundColor: PS_GREEN }]} />
+        <View style={[styles.psStepImage, { backgroundColor: '#d4f5de' }]} />
       )}
     </View>
   );
 
-  // If no image is provided, fall back to the previous banner-style text-only card
   if (!image) {
     return (
       <View style={styles.psCard}>
         <LinearGradient
-          colors={[PS_GREEN, PS_GREEN_LIGHT]}
+          colors={['#1a5c2a', '#2d8c45']}
           start={{ x: 0, y: 0 }}
           end={{ x: 1, y: 0 }}
           style={styles.psBanner}
@@ -694,18 +565,16 @@ const PreventionStepCard = ({ step, heading, body, image }) => {
   );
 };
 
-const PreventionStepsSection = ({ preventionSteps, diseaseColor, sourceUrl }) => (
+const PreventionStepsSection = ({ preventionSteps, diseaseColor }) => (
   <View style={styles.psSection}>
-    {/* Header card */}
     <View style={styles.psSectionHeader}>
-      <Text style={[styles.psSectionTitle, { color: diseaseColor || PS_LINK_COLOR }]}>
+      <Text style={[styles.psSectionTitle, { color: diseaseColor || '#2d8c45' }]}>
         {preventionSteps.title}
       </Text>
       {preventionSteps.subtitle ? (
         <Text style={styles.psSectionSubtitle}>{preventionSteps.subtitle}</Text>
       ) : null}
     </View>
-    {/* Step cards */}
     {preventionSteps.steps.map((s) => (
       <PreventionStepCard
         key={s.step}
@@ -718,9 +587,10 @@ const PreventionStepsSection = ({ preventionSteps, diseaseColor, sourceUrl }) =>
   </View>
 );
 
-// â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
-// Disease detail renderer
-// â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ═══════════════════════════════════════════════════════════════════════════════
+// REUSABLE ANIMATED PRESS BUTTON
+// ═══════════════════════════════════════════════════════════════════════════════
+// -- Disease detail renderer ----------------------------------------------------
 const DiseaseDetail = ({ classLabel }) => {
   const info = DISEASE_INFO[classLabel];
   if (!info) return null;
@@ -744,7 +614,7 @@ const DiseaseDetail = ({ classLabel }) => {
       <SectionCard>
         <SectionHeading text="Treatment Overview" color={info.color} />
         <Text style={styles.bodyText}>{info.treatmentSummary}</Text>
-        <Text style={[styles.subHeading, { marginTop: 14 }]}>Key Treatment & Control Measures:</Text>
+        <Text style={[styles.subHeading, { marginTop: 14 }]}>Key Treatment &amp; Control Measures:</Text>
         {info.treatmentDetails.map((item, idx) => (
           <TreatmentItem key={idx} heading={item.heading} body={item.body} />
         ))}
@@ -770,15 +640,12 @@ const DiseaseDetail = ({ classLabel }) => {
       <PreventionStepsSection
         preventionSteps={info.preventionSteps}
         diseaseColor={info.color}
-        sourceUrl={info.sourceUrl}
       />
     </View>
   );
 };
 
-// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
-// MAIN SCREEN
-// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+// -- Main Screen ---------------------------------------------------------------
 const DroppingUploadScreen = ({ navigation, route }) => {
   const { imagePredictionId } = route.params || {};
 
@@ -787,81 +654,128 @@ const DroppingUploadScreen = ({ navigation, route }) => {
   const [uploadProgress, setUploadProgress] = useState(0);
   const [result, setResult]                 = useState(null);
 
-  // â”€â”€ Animated values â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
-  const headerFade         = useRef(new Animated.Value(0)).current;
-  const headerSlide        = useRef(new Animated.Value(30)).current;
-  const cardFade           = useRef(new Animated.Value(0)).current;
-  const cardSlide          = useRef(new Animated.Value(40)).current;
-  const imagePreviewOpacity = useRef(new Animated.Value(0)).current;
-  const imagePreviewScale  = useRef(new Animated.Value(0.88)).current;
-  const resultFade         = useRef(new Animated.Value(0)).current;
-  const resultSlide        = useRef(new Animated.Value(50)).current;
-  const glowPulse          = useRef(new Animated.Value(0)).current;
-  const loadingTextOpacity = useRef(new Animated.Value(1)).current;
-  const loadingPulseRef    = useRef(null);
+  // Toast state
+  const [toastMsg, setToastMsg]         = useState('');
+  const [toastVisible, setToastVisible] = useState(false);
 
-  // â”€â”€ Mount: header + card fade in â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+  // Animation refs (same pattern as Steps 1 & 2)
+  const chickenAnim     = useRef(new Animated.Value(0)).current;
+  const shimmerAnim     = useRef(new Animated.Value(-SCREEN_WIDTH)).current;
+  const stepDotAnim     = useRef(new Animated.Value(1)).current;
+  const waveBarAnims    = useRef(
+    Array.from({ length: 9 }, () => new Animated.Value(0.3))
+  ).current;
+  const dotAnims = useRef([
+    new Animated.Value(0),
+    new Animated.Value(0),
+    new Animated.Value(0),
+  ]).current;
+  const resultScaleAnim = useRef(new Animated.Value(0.8)).current;
+  const resultOpacity   = useRef(new Animated.Value(0)).current;
+  const confidenceAnim  = useRef(new Animated.Value(0)).current;
+  const toastAnim       = useRef(new Animated.Value(100)).current;
+
+  // -- Idle animations ------------------------------------------------------
   useEffect(() => {
-    Animated.parallel([
-      Animated.timing(headerFade,  { toValue: 1, duration: 600, easing: Easing.out(Easing.quad), useNativeDriver: true }),
-      Animated.timing(headerSlide, { toValue: 0, duration: 600, easing: Easing.out(Easing.quad), useNativeDriver: true }),
-    ]).start();
-    setTimeout(() => {
-      Animated.parallel([
-        Animated.timing(cardFade,  { toValue: 1, duration: 500, easing: Easing.out(Easing.quad), useNativeDriver: true }),
-        Animated.timing(cardSlide, { toValue: 0, duration: 500, easing: Easing.out(Easing.quad), useNativeDriver: true }),
-      ]).start();
-    }, 200);
+    Animated.loop(
+      Animated.sequence([
+        Animated.timing(chickenAnim, { toValue: -8, duration: 600, useNativeDriver: true }),
+        Animated.timing(chickenAnim, { toValue: 0,  duration: 600, useNativeDriver: true }),
+      ])
+    ).start();
+
+    shimmerAnim.setValue(-SCREEN_WIDTH);
+    Animated.loop(
+      Animated.timing(shimmerAnim, { toValue: SCREEN_WIDTH, duration: 1800, useNativeDriver: true })
+    ).start();
+
+    Animated.loop(
+      Animated.sequence([
+        Animated.timing(stepDotAnim, { toValue: 1.4, duration: 700, useNativeDriver: true }),
+        Animated.timing(stepDotAnim, { toValue: 1.0, duration: 700, useNativeDriver: true }),
+      ])
+    ).start();
   }, []);
 
-  // â”€â”€ Image selected: zoom-in + fade â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
-  useEffect(() => {
-    if (imageFile) {
-      imagePreviewOpacity.setValue(0);
-      imagePreviewScale.setValue(0.88);
-      Animated.parallel([
-        Animated.timing(imagePreviewOpacity, { toValue: 1, duration: 450, easing: Easing.out(Easing.quad), useNativeDriver: true }),
-        Animated.spring(imagePreviewScale,   { toValue: 1, useNativeDriver: true, speed: 14, bounciness: 10 }),
-      ]).start();
-    }
-  }, [imageFile]);
-
-  // â”€â”€ Result: slide-up + glow â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
-  useEffect(() => {
-    if (!result) return;
-    resultFade.setValue(0);
-    resultSlide.setValue(50);
-    Animated.parallel([
-      Animated.timing(resultFade,  { toValue: 1, duration: 500, easing: Easing.out(Easing.quad), useNativeDriver: true }),
-      Animated.spring(resultSlide, { toValue: 0, useNativeDriver: true, speed: 12, bounciness: 8 }),
-    ]).start();
-    const glowLoop = Animated.loop(
-      Animated.sequence([
-        Animated.timing(glowPulse, { toValue: 1, duration: 1200, easing: Easing.inOut(Easing.sin), useNativeDriver: true }),
-        Animated.timing(glowPulse, { toValue: 0, duration: 1200, easing: Easing.inOut(Easing.sin), useNativeDriver: true }),
-      ])
-    );
-    glowLoop.start();
-    return () => glowLoop.stop();
-  }, [result]);
-
-  // â”€â”€ Loading: text pulse â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+  // -- Waveform + bouncing dots while uploading -----------------------------
   useEffect(() => {
     if (uploading) {
-      loadingPulseRef.current = Animated.loop(
-        Animated.sequence([
-          Animated.timing(loadingTextOpacity, { toValue: 0.3, duration: 700, useNativeDriver: true }),
-          Animated.timing(loadingTextOpacity, { toValue: 1,   duration: 700, useNativeDriver: true }),
-        ])
+      waveBarAnims.forEach(a => a.setValue(0.3));
+      dotAnims.forEach(a => a.setValue(0));
+
+      const waveLoops = waveBarAnims.map(anim =>
+        Animated.loop(
+          Animated.sequence([
+            Animated.timing(anim, { toValue: 1.0, duration: 350, useNativeDriver: true }),
+            Animated.timing(anim, { toValue: 0.3, duration: 350, useNativeDriver: true }),
+          ])
+        )
       );
-      loadingPulseRef.current.start();
-    } else {
-      loadingPulseRef.current?.stop();
-      loadingTextOpacity.setValue(1);
+      Animated.stagger(80, waveLoops).start();
+
+      const dotLoops = dotAnims.map(anim =>
+        Animated.loop(
+          Animated.sequence([
+            Animated.timing(anim, { toValue: -7, duration: 280, useNativeDriver: true }),
+            Animated.timing(anim, { toValue: 0,  duration: 280, useNativeDriver: true }),
+          ])
+        )
+      );
+      Animated.stagger(150, dotLoops).start();
+
+      return () => {
+        waveLoops.forEach(a => a.stop());
+        dotLoops.forEach(a => a.stop());
+        waveBarAnims.forEach(a => a.setValue(0.3));
+        dotAnims.forEach(a => a.setValue(0));
+      };
     }
   }, [uploading]);
 
-  // â”€â”€ Permissions â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+  // -- Result entrance + confidence bar ------------------------------------
+  useEffect(() => {
+    if (result) {
+      resultScaleAnim.setValue(0.8);
+      resultOpacity.setValue(0);
+      confidenceAnim.setValue(0);
+
+      Animated.parallel([
+        Animated.spring(resultScaleAnim, {
+          toValue: 1.0,
+          friction: 6,
+          tension: 100,
+          useNativeDriver: true,
+        }),
+        Animated.timing(resultOpacity, {
+          toValue: 1,
+          duration: 400,
+          useNativeDriver: true,
+        }),
+      ]).start();
+
+      const targetConfidence =
+        result.confidence != null ? result.confidence * 100 : 100;
+      Animated.timing(confidenceAnim, {
+        toValue: targetConfidence,
+        duration: 1000,
+        useNativeDriver: false,
+      }).start();
+    }
+  }, [result]);
+
+  // -- Toast helper ---------------------------------------------------------
+  const showToast = (msg) => {
+    setToastMsg(msg);
+    setToastVisible(true);
+    toastAnim.setValue(100);
+    Animated.sequence([
+      Animated.timing(toastAnim, { toValue: 0,   duration: 300, useNativeDriver: true }),
+      Animated.delay(2200),
+      Animated.timing(toastAnim, { toValue: 100, duration: 300, useNativeDriver: true }),
+    ]).start(() => setToastVisible(false));
+  };
+
+  // -- Permissions ----------------------------------------------------------
   const requestCameraPermission = async () => {
     const { status } = await ImagePicker.requestCameraPermissionsAsync();
     if (status !== 'granted') {
@@ -871,7 +785,7 @@ const DroppingUploadScreen = ({ navigation, route }) => {
     return true;
   };
 
-  // â”€â”€ Camera â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+  // -- Camera ---------------------------------------------------------------
   const takePhoto = async () => {
     const hasPermission = await requestCameraPermission();
     if (!hasPermission) return;
@@ -890,13 +804,14 @@ const DroppingUploadScreen = ({ navigation, route }) => {
             : { uri: image.uri, name: `dropping_${Date.now()}.jpg`, type: 'image/jpeg' };
         setImageFile(fileData);
         setResult(null);
+        showToast('✓ Photo captured');
       }
     } catch {
       Alert.alert('Error', 'Failed to take photo');
     }
   };
 
-  // â”€â”€ Upload & analyse â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+  // -- Upload & analyse -----------------------------------------------------
   const handleUpload = async () => {
     if (!imageFile) { Alert.alert('No Image', 'Please capture a dropping image first'); return; }
     setUploading(true);
@@ -921,195 +836,192 @@ const DroppingUploadScreen = ({ navigation, route }) => {
     setImageFile(null);
     setResult(null);
     setUploadProgress(0);
-    imagePreviewOpacity.setValue(0);
   };
 
-  const getResultColor = (classLabel) => DISEASE_INFO[classLabel]?.color || COLORS.textMuted;
-  const isHealthy = result?.class_label === 'healthy';
-  const glowOpacity = glowPulse.interpolate({ inputRange: [0, 1], outputRange: [0.15, 0.4] });
+  const goBackToImage = () => navigation.goBack();
 
+  const getResultColor = (classLabel) => DISEASE_INFO[classLabel]?.color || '#2d8c45';
+
+  const confidencePercent =
+    result ? (result.confidence != null ? result.confidence * 100 : 100) : 0;
+
+  // -- Render ---------------------------------------------------------------
   return (
-    <View style={styles.rootContainer}>
-      {/* â”€â”€ Dark gradient background â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
-      <LinearGradient
-        colors={['#071A0D', '#0D2818', '#071A0D']}
-        style={StyleSheet.absoluteFillObject}
-        start={{ x: 0, y: 0 }}
-        end={{ x: 1, y: 1 }}
-      />
+    <View style={styles.root}>
 
-      {/* â”€â”€ Ambient orbs â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
-      <BackgroundOrb x={SCREEN_WIDTH * 0.15} y={90}  size={220} color={COLORS.primary} delay={0} />
-      <BackgroundOrb x={SCREEN_WIDTH * 0.88} y={210} size={180} color={COLORS.cyan}    delay={1500} />
-      <BackgroundOrb x={SCREEN_WIDTH * 0.4}  y={560} size={160} color={COLORS.primary} delay={800} />
+      {/* -- Sticky Header ----------------------------------------------- */}
+      <LinearGradient colors={['#1a5c2a', '#3dba5c']} style={styles.header}>
+        <Animated.Text style={[styles.headerChicken, { transform: [{ translateY: chickenAnim }] }]}>
+          🐔
+        </Animated.Text>
+        <View style={styles.headerCenter}>
+          <Text style={styles.headerTitle}>Poultry Health Detection</Text>
+        </View>
+        <View style={styles.aiBadge}>
+          <Text style={styles.aiBadgeText}>AI Powered</Text>
+        </View>
+      </LinearGradient>
 
       <ScrollView
         style={styles.scroll}
-        contentContainerStyle={styles.contentContainer}
+        contentContainerStyle={styles.scrollContent}
         showsVerticalScrollIndicator={false}
       >
-        {/* â”€â”€ Header â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
-        <Animated.View style={[styles.header, { opacity: headerFade, transform: [{ translateY: headerSlide }] }]}>
-          <LinearGradient
-            colors={['#0F3320', '#072612']}
-            style={styles.headerGradient}
-            start={{ x: 0, y: 0 }}
-            end={{ x: 1, y: 1 }}
-          >
-            <View style={styles.stepBadgeRow}>
-              <LinearGradient colors={[COLORS.primary, COLORS.cyan]} style={styles.stepChip} start={{ x: 0, y: 0 }} end={{ x: 1, y: 0 }}>
-                <Text style={styles.stepChipText}>STEP 3</Text>
-              </LinearGradient>
-            </View>
-            <Text style={styles.headerTitle}>Disease{'\n'}Detection</Text>
-            <Text style={styles.headerSubtitle}>
-              Capture a dropping image for instant AI-powered pathogen analysis
-            </Text>
-            {/* Decorative dot grid */}
-            <View style={styles.dotGrid} pointerEvents="none">
-              {[...Array(15)].map((_, i) => <View key={i} style={styles.dot} />)}
-            </View>
-          </LinearGradient>
-        </Animated.View>
 
-        {/* â”€â”€ Upload Card â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
-        <Animated.View style={[styles.uploadCard, { opacity: cardFade, transform: [{ translateY: cardSlide }] }]}>
-          <View style={styles.uploadCardHeader}>
-            <Text style={styles.uploadCardTitle}>Dropping Sample</Text>
-            {imageFile && (
-              <TouchableOpacity onPress={resetUpload} style={styles.resetChip}>
-                <Text style={styles.resetChipText}>{'\u2715'} Reset</Text>
-              </TouchableOpacity>
-            )}
+        {/* -- Progress Steps Bar ---------------------------------------- */}
+        <View style={styles.progressBar}>
+          <View style={[styles.stepPill, styles.stepPillDone]}>
+            <Text style={[styles.stepPillText, styles.stepPillTextDone]}>✓ 1 Sound</Text>
           </View>
+          <View style={styles.stepConnector} />
+          <View style={[styles.stepPill, styles.stepPillDone]}>
+            <Text style={[styles.stepPillText, styles.stepPillTextDone]}>✓ 2 Image</Text>
+          </View>
+          <View style={styles.stepConnector} />
+          <View style={[styles.stepPill, styles.stepPillActive]}>
+            <Text style={[styles.stepPillText, styles.stepPillTextActive]}>3 Disease</Text>
+          </View>
+        </View>
 
-          {imageFile ? (
-            /* â”€â”€ Preview â”€â”€ */
-            <Animated.View style={[styles.imagePreviewWrapper, { opacity: imagePreviewOpacity, transform: [{ scale: imagePreviewScale }] }]}>
+        {/* -- Step Header ----------------------------------------------- */}
+        <View style={styles.stepHeader}>
+          <View style={styles.stepTagRow}>
+            <Animated.View style={[styles.stepDot, { transform: [{ scale: stepDotAnim }] }]} />
+            <Text style={styles.stepTag}>Step 3 of 3</Text>
+          </View>
+          <Text style={styles.stepTitle}>Disease Detection</Text>
+          <Text style={styles.stepSubtitle}>
+            Capture a dropping image for AI-powered pathogen analysis
+          </Text>
+        </View>
+
+        {/* -- Upload Card ---------------------------------------------- */}
+        <View style={styles.card}>
+          <View style={styles.cardTopAccent} />
+          <Text style={styles.cardTitle}>🔬 Capture Dropping Sample</Text>
+
+          {imageFile && (
+            <View style={styles.imagePreview}>
               <Image
-                source={{ uri: imageFile.uri || (imageFile instanceof File ? URL.createObjectURL(imageFile) : null) }}
+                source={{
+                  uri: imageFile.uri ||
+                    (typeof File !== 'undefined' && imageFile instanceof File
+                      ? URL.createObjectURL(imageFile)
+                      : null),
+                }}
                 style={styles.previewImage}
                 resizeMode="cover"
               />
-              {uploading && <ScanOverlay imageHeight={240} />}
-              {/* Corner brackets */}
-              <View style={[styles.corner, styles.cTL]} />
-              <View style={[styles.corner, styles.cTR]} />
-              <View style={[styles.corner, styles.cBL]} />
-              <View style={[styles.corner, styles.cBR]} />
-            </Animated.View>
-          ) : (
-            /* â”€â”€ Drop zone â”€â”€ */
-            <AnimatedPressable onPress={takePhoto} disabled={uploading} style={styles.uploadZone}>
-              <LinearGradient
-                colors={['rgba(22,163,74,0.08)', 'rgba(134,239,172,0.06)']}
-                style={styles.uploadZoneInner}
-                start={{ x: 0, y: 0 }}
-                end={{ x: 1, y: 1 }}
-              >
-                <View style={styles.uploadIconRing}>
-                  <LinearGradient colors={[COLORS.primary, COLORS.cyan]} style={styles.uploadIconGradient} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }}>
-                    <Text style={styles.uploadIcon}>{'\u{1F4F7}'}</Text>
-                  </LinearGradient>
-                </View>
-                <Text style={styles.uploadZoneTitle}>Tap to Capture</Text>
-                <Text style={styles.uploadZoneSubtitle}>Take a clear photo of the dropping sample</Text>
-                <View style={styles.uploadZoneTags}>
-                  {['JPEG', 'PNG', 'High Quality'].map((t) => (
-                    <View key={t} style={styles.tag}><Text style={styles.tagText}>{t}</Text></View>
-                  ))}
-                </View>
-              </LinearGradient>
-            </AnimatedPressable>
-          )}
-
-          {imageFile && !uploading && (
-            <View style={styles.fileReadyBadge}>
-              <View style={styles.readyDot} />
-              <Text style={styles.fileReadyText}>Image ready for AI analysis</Text>
             </View>
           )}
-        </Animated.View>
 
-        {/* â”€â”€ Loading State â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
+          <TouchableOpacity
+            style={[styles.pickerBtn, styles.cameraBtn]}
+            onPress={takePhoto}
+            disabled={uploading}
+            activeOpacity={0.82}
+          >
+            <Text style={styles.pickerBtnText}>
+              📷 {imageFile ? 'Retake Photo' : 'Camera'}
+            </Text>
+          </TouchableOpacity>
+
+          {imageFile && (
+            <View style={styles.fileInfoRow}>
+              <View style={styles.fileCheckBadge}>
+                <Text style={styles.fileCheckBadgeText}>✓</Text>
+              </View>
+              <Text style={styles.fileInfoText}>Image ready for analysis</Text>
+            </View>
+          )}
+        </View>
+
+        {/* -- Analyze Button with shimmer ------------------------------- */}
+        {imageFile && !uploading && !result && (
+          <TouchableOpacity
+            onPress={handleUpload}
+            activeOpacity={0.88}
+            style={styles.analyzeWrapper}
+          >
+            <LinearGradient colors={['#2d8c45', '#1a5c2a']} style={styles.analyzeBtn}>
+              <Animated.View
+                style={[styles.shimmer, { transform: [{ translateX: shimmerAnim }] }]}
+                pointerEvents="none"
+              />
+              <Text style={styles.analyzeBtnText}>🔬  Analyze Dropping</Text>
+            </LinearGradient>
+          </TouchableOpacity>
+        )}
+
+        {/* -- Waveform Loading State ------------------------------------ */}
         {uploading && (
           <View style={styles.loadingCard}>
-            <LinearGradient
-              colors={['rgba(22,163,74,0.12)', 'rgba(134,239,172,0.08)']}
-              style={styles.loadingGradient}
-              start={{ x: 0, y: 0 }}
-              end={{ x: 1, y: 1 }}
-            >
-              <View style={styles.spinnerRing}>
-                <LinearGradient colors={[COLORS.primary, COLORS.cyan, COLORS.primary]} style={styles.spinnerGradient} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }}>
-                  <View style={styles.spinnerInner}>
-                    <Text style={styles.spinnerPercent}>{uploadProgress}%</Text>
-                  </View>
-                </LinearGradient>
-              </View>
-              <Animated.Text style={[styles.loadingTitle, { opacity: loadingTextOpacity }]}>
-                {'Analysing with AI Model\u2026'}
-              </Animated.Text>
-              <View style={styles.loadingDots}>
-                <PulsingDot color={COLORS.primary} delay={0} />
-                <PulsingDot color={COLORS.cyan}    delay={200} />
-                <PulsingDot color={COLORS.primary} delay={400} />
-              </View>
-              <Text style={styles.loadingSubtitle}>Scanning pathogen patterns in dropping sample</Text>
-              <View style={styles.loadingBarTrack}>
-                <View style={[styles.loadingBarFill, { width: `${uploadProgress}%` }]} />
-              </View>
-            </LinearGradient>
+            <View style={styles.waveform}>
+              {waveBarAnims.map((anim, i) => (
+                <Animated.View
+                  key={i}
+                  style={[styles.waveBar, { transform: [{ scaleY: anim }] }]}
+                />
+              ))}
+            </View>
+            <Text style={styles.loadingText}>Scanning pathogen patterns...</Text>
+            <View style={styles.bounceDots}>
+              {dotAnims.map((anim, i) => (
+                <Animated.View
+                  key={i}
+                  style={[styles.bounceDot, { transform: [{ translateY: anim }] }]}
+                />
+              ))}
+            </View>
           </View>
         )}
 
-        {/* â”€â”€ Analyse Button â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
-        {imageFile && !result && !uploading && (
-          <AnimatedPressable onPress={handleUpload} style={styles.analyseButton}>
-            <LinearGradient colors={[COLORS.primary, COLORS.cyan]} style={styles.analyseButtonInner} start={{ x: 0, y: 0 }} end={{ x: 1, y: 0 }}>
-              <Text style={styles.analyseButtonText}>{'\u{1F52C}'}  Run AI Analysis</Text>
-            </LinearGradient>
-          </AnimatedPressable>
-        )}
-
-        {/* â”€â”€ Result Card â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
+        {/* -- Result Card ----------------------------------------------- */}
         {result && (
-          <Animated.View style={[styles.resultCard, { opacity: resultFade, transform: [{ translateY: resultSlide }] }]}>
-            {/* Glow */}
-            <Animated.View
-              pointerEvents="none"
-              style={[styles.resultGlow, { backgroundColor: isHealthy ? COLORS.success : COLORS.danger, opacity: glowOpacity }]}
-            />
-            {/* Result header */}
-            <LinearGradient
-              colors={isHealthy
-                ? ['rgba(16,185,129,0.15)', 'rgba(16,185,129,0.04)']
-                : ['rgba(239,68,68,0.15)',  'rgba(239,68,68,0.04)']}
-              style={styles.resultHeader}
-              start={{ x: 0, y: 0 }}
-              end={{ x: 1, y: 1 }}
-            >
-              <Text style={styles.resultEmoji}>{DISEASE_INFO[result.class_label]?.emoji || '\u{1F52C}'}</Text>
-              <Text style={[styles.resultName, { color: getResultColor(result.class_label) }]}>{result.result}</Text>
-              <View style={[styles.resultPill, { backgroundColor: getResultColor(result.class_label) + '22', borderColor: getResultColor(result.class_label) }]}>
-                <Text style={[styles.resultPillText, { color: getResultColor(result.class_label) }]}>Detection Complete</Text>
-              </View>
-            </LinearGradient>
+          <Animated.View
+            style={[
+              styles.resultCard,
+              { borderColor: getResultColor(result.class_label) },
+              { transform: [{ scale: resultScaleAnim }], opacity: resultOpacity },
+            ]}
+          >
+            <Text style={[styles.resultLabel, { color: getResultColor(result.class_label) }]}>
+              {DISEASE_INFO[result.class_label]?.emoji || '❓'} {result.result}
+            </Text>
 
-            {/* Confidence */}
-            {result.confidence != null && (
-              <View style={styles.confidenceSection}>
-                <Text style={styles.confidenceSectionTitle}>AI Confidence Score</Text>
-                <ConfidenceBar label="Prediction Confidence" value={result.confidence} color={getResultColor(result.class_label)} />
-              </View>
-            )}
+            <View style={styles.confBarTrack}>
+              <Animated.View
+                style={[
+                  styles.confBarFill,
+                  { backgroundColor: getResultColor(result.class_label) },
+                  {
+                    width: confidenceAnim.interpolate({
+                      inputRange: [0, 100],
+                      outputRange: ['0%', '100%'],
+                      extrapolate: 'clamp',
+                    }),
+                  },
+                ]}
+              />
+            </View>
+            <Text style={styles.confLabel}>
+              Confidence: {confidencePercent.toFixed(1)}%
+            </Text>
 
             <Text style={styles.resultMessage}>{result.message}</Text>
 
+            <View style={styles.resultBtns}>
+              <TouchableOpacity style={styles.resetBtn} onPress={resetUpload} activeOpacity={0.8}>
+                <Text style={styles.resetBtnText}>↺ Analyze Another</Text>
+              </TouchableOpacity>
+              <TouchableOpacity style={styles.backBtn} onPress={goBackToImage} activeOpacity={0.8}>
+                <Text style={styles.backBtnText}>← Back</Text>
+              </TouchableOpacity>
+            </View>
           </Animated.View>
         )}
 
-        {/* â”€â”€ Detailed Disease Info â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
+        {/* -- Detailed Disease Info -------------------------------------- */}
         {result && (
           <View>
             <Text style={styles.detailHeader}>Detailed Report</Text>
@@ -1117,369 +1029,393 @@ const DroppingUploadScreen = ({ navigation, route }) => {
           </View>
         )}
 
-        {/* â”€â”€ Instructions â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
+        {/* -- Instructions (before result) ------------------------------- */}
         {!result && !uploading && (
-          <Animated.View style={[styles.instructionsCard, { opacity: cardFade }]}>
-            <LinearGradient
-              colors={['rgba(22,163,74,0.1)', 'rgba(134,239,172,0.06)']}
-              style={styles.instructionsGradient}
-              start={{ x: 0, y: 0 }}
-              end={{ x: 1, y: 1 }}
-            >
-              <Text style={styles.instructionsTitle}>{'\u{1F4CB}'}  How to get the best results</Text>
-              {[
-                'Take a clear, well-lit photo of the poultry dropping',
-                'Ensure the dropping is fully visible in frame',
-                'Avoid blurry or dark images for accurate detection',
-                'Supported formats: JPEG, PNG',
-              ].map((tip, i) => (
-                <View key={i} style={styles.tipRow}>
-                  <LinearGradient colors={[COLORS.primary, COLORS.cyan]} style={styles.tipBadge} start={{ x: 0, y: 0 }} end={{ x: 1, y: 0 }}>
-                    <Text style={styles.tipBadgeText}>{i + 1}</Text>
-                  </LinearGradient>
-                  <Text style={styles.tipText}>{tip}</Text>
+          <View style={styles.instructionsBox}>
+            <Text style={styles.instructionsTitle}>💡 Instructions</Text>
+            {[
+              'Take a clear, well-lit photo of the poultry dropping',
+              'Ensure the dropping is fully visible in frame',
+              'Avoid blurry or dark images for accurate detection',
+              'Supported formats: JPEG, PNG',
+              'The AI will identify Coccidiosis, Newcastle, Salmonella, or Healthy',
+            ].map((item, i) => (
+              <View key={i} style={styles.instructionItem}>
+                <View style={styles.instrNumBadge}>
+                  <Text style={styles.instrNumText}>{i + 1}</Text>
                 </View>
-              ))}
-              <View style={styles.diseaseChips}>
-                <Text style={styles.diseaseChipsLabel}>Detectable Conditions:</Text>
-                <View style={styles.chipRow}>
-                  {[
-                    { label: 'Coccidiosis', color: '#A855F7' },
-                    { label: 'Newcastle',   color: '#F59E0B' },
-                    { label: 'Salmonella',  color: '#EF4444' },
-                    { label: 'Healthy',     color: '#10B981' },
-                  ].map((d) => (
-                    <View key={d.label} style={[styles.diseaseChip, { borderColor: d.color }]}>
-                      <View style={[styles.diseaseDot, { backgroundColor: d.color }]} />
-                      <Text style={[styles.diseaseChipText, { color: d.color }]}>{d.label}</Text>
-                    </View>
-                  ))}
-                </View>
+                <Text style={styles.instructionText}>{item}</Text>
               </View>
-            </LinearGradient>
-          </Animated.View>
+            ))}
+          </View>
         )}
 
         <View style={{ height: 40 }} />
       </ScrollView>
+
+      {/* -- Toast --------------------------------------------------------- */}
+      {toastVisible && (
+        <Animated.View style={[styles.toast, { transform: [{ translateY: toastAnim }] }]}>
+          <Text style={styles.toastText}>{toastMsg}</Text>
+        </Animated.View>
+      )}
+
     </View>
   );
 };
 
-// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
-// STYLES
-// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 const styles = StyleSheet.create({
-  rootContainer: { flex: 1, backgroundColor: COLORS.bg },
-  scroll: { flex: 1 },
-  contentContainer: { paddingHorizontal: 16, paddingTop: 16, paddingBottom: 40 },
+  // -- Root -----------------------------------------------------------------
+  root: { flex: 1, backgroundColor: '#f7fdf9' },
 
-  // Header
-  header: { marginBottom: 20 },
-  headerGradient: {
-    borderRadius: 24, padding: 24, overflow: 'hidden',
-    borderWidth: 1, borderColor: 'rgba(22,163,74,0.3)',
+  // -- Header ---------------------------------------------------------------
+  header: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingTop: Platform.OS === 'ios' ? 52 : 36,
+    paddingBottom: 16,
+    paddingHorizontal: 18,
   },
-  stepBadgeRow: { flexDirection: 'row', alignItems: 'center', marginBottom: 16, gap: 10 },
-  stepChip: { borderRadius: 20, paddingHorizontal: 14, paddingVertical: 5 },
-  stepChipText: { color: COLORS.white, fontSize: 11, fontWeight: '800', letterSpacing: 1.5 },
-  aiChip: {
-    borderRadius: 20, paddingHorizontal: 12, paddingVertical: 5,
-    borderWidth: 1, borderColor: COLORS.cyan, backgroundColor: 'rgba(134,239,172,0.1)',
-  },
-  aiChipText: { color: COLORS.cyan, fontSize: 11, fontWeight: '700', letterSpacing: 1 },
+  headerChicken: { fontSize: 32, marginRight: 10 },
+  headerCenter:  { flex: 1 },
   headerTitle: {
-    fontSize: 38, fontWeight: '900', color: COLORS.white,
-    lineHeight: 42, marginBottom: 10, letterSpacing: -0.5,
+    fontFamily: 'PlayfairDisplay-Bold',
+    fontSize: 18,
+    fontWeight: 'bold',
+    color: '#ffffff',
   },
-  headerSubtitle: { fontSize: 14, color: COLORS.textMuted, lineHeight: 20, maxWidth: '80%' },
-  dotGrid: { position: 'absolute', right: 16, top: 16, flexDirection: 'row', flexWrap: 'wrap', width: 60, gap: 6 },
-  dot: { width: 4, height: 4, borderRadius: 2, backgroundColor: 'rgba(167,139,250,0.3)' },
+  aiBadge: {
+    backgroundColor: 'rgba(255,255,255,0.22)',
+    borderRadius: 20,
+    paddingHorizontal: 10,
+    paddingVertical: 4,
+    borderWidth: 1,
+    borderColor: 'rgba(255,255,255,0.5)',
+    marginLeft: 8,
+  },
+  aiBadgeText: { color: '#ffffff', fontSize: 11, fontFamily: 'Nunito-Bold', fontWeight: '700' },
 
-  // Upload card
-  uploadCard: {
-    backgroundColor: COLORS.bgCard, borderRadius: 20, padding: 16, marginBottom: 16,
-    borderWidth: 1, borderColor: COLORS.border,
-  },
-  uploadCardHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 14 },
-  uploadCardTitle: { fontSize: 16, fontWeight: '700', color: COLORS.text },
-  resetChip: {
-    borderRadius: 12, paddingHorizontal: 12, paddingVertical: 4,
-    backgroundColor: 'rgba(239,68,68,0.15)', borderWidth: 1, borderColor: 'rgba(239,68,68,0.4)',
-  },
-  resetChipText: { color: COLORS.danger, fontSize: 12, fontWeight: '600' },
+  // -- Scroll ---------------------------------------------------------------
+  scroll:        { flex: 1 },
+  scrollContent: { padding: 18, paddingBottom: 48 },
 
-  // Upload zone
-  uploadZone: { borderRadius: 16, overflow: 'hidden', marginBottom: 14 },
-  uploadZoneInner: {
-    borderRadius: 16, borderWidth: 1.5, borderColor: 'rgba(22,163,74,0.4)',
-    borderStyle: 'dashed', padding: 32, alignItems: 'center',
+  // -- Progress Bar ---------------------------------------------------------
+  progressBar: { flexDirection: 'row', alignItems: 'center', marginBottom: 22, marginTop: 4 },
+  stepPill: {
+    flex: 1,
+    backgroundColor: '#e0ede3',
+    borderRadius: 20,
+    paddingVertical: 7,
+    paddingHorizontal: 4,
+    alignItems: 'center',
   },
-  uploadIconRing: {
-    width: 72, height: 72, borderRadius: 36, overflow: 'hidden', marginBottom: 16,
-    shadowColor: COLORS.primary, shadowOffset: { width: 0, height: 0 },
-    shadowOpacity: 0.6, shadowRadius: 16, elevation: 8,
+  stepPillDone:   { backgroundColor: '#a5d6b0' },
+  stepPillActive: { backgroundColor: '#2d8c45' },
+  stepPillText: {
+    fontSize: 10,
+    color: '#6a8a70',
+    fontFamily: 'Nunito-Bold',
+    fontWeight: '700',
+    textAlign: 'center',
   },
-  uploadIconGradient: { flex: 1, alignItems: 'center', justifyContent: 'center' },
-  uploadIcon: { fontSize: 30 },
-  uploadZoneTitle: { fontSize: 17, fontWeight: '700', color: COLORS.text, marginBottom: 6 },
-  uploadZoneSubtitle: { fontSize: 13, color: COLORS.textMuted, textAlign: 'center', marginBottom: 16 },
-  uploadZoneTags: { flexDirection: 'row', gap: 8 },
-  tag: {
-    borderRadius: 8, paddingHorizontal: 10, paddingVertical: 3,
-    backgroundColor: 'rgba(22,163,74,0.12)', borderWidth: 1, borderColor: 'rgba(22,163,74,0.25)',
-  },
-  tagText: { fontSize: 11, color: COLORS.primaryLight, fontWeight: '600' },
+  stepPillTextDone:   { color: '#1a5c2a' },
+  stepPillTextActive: { color: '#ffffff' },
+  stepConnector: { height: 2, width: 10, backgroundColor: '#c5dec8' },
 
-  // Image preview
-  imagePreviewWrapper: {
-    width: '100%', height: 240, borderRadius: 16, overflow: 'hidden', marginBottom: 14,
-    backgroundColor: '#091C0F', borderWidth: 1, borderColor: 'rgba(22,163,74,0.4)',
+  // -- Step Header ----------------------------------------------------------
+  stepHeader:  { marginBottom: 20 },
+  stepTagRow:  { flexDirection: 'row', alignItems: 'center', marginBottom: 8 },
+  stepDot: {
+    width: 10,
+    height: 10,
+    borderRadius: 5,
+    backgroundColor: '#3dba5c',
+    marginRight: 8,
+  },
+  stepTag: {
+    fontSize: 13,
+    color: '#2d8c45',
+    fontFamily: 'Nunito-Bold',
+    fontWeight: '700',
+    letterSpacing: 0.4,
+  },
+  stepTitle: {
+    fontFamily: 'PlayfairDisplay-Black',
+    fontSize: 30,
+    fontWeight: '900',
+    color: '#1a5c2a',
+    marginBottom: 6,
+  },
+  stepSubtitle: { fontSize: 14, color: '#7a9a80', fontFamily: 'Nunito-Bold', lineHeight: 20 },
+
+  // -- Upload Card ----------------------------------------------------------
+  card: {
+    backgroundColor: '#ffffff',
+    borderRadius: 20,
+    padding: 22,
+    marginBottom: 18,
+    shadowColor: '#1a5c2a',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.09,
+    shadowRadius: 12,
+    elevation: 4,
+    overflow: 'hidden',
+  },
+  cardTopAccent: {
+    position: 'absolute',
+    top: 0, left: 0, right: 0,
+    height: 4,
+    backgroundColor: '#3dba5c',
+  },
+  cardTitle: {
+    fontFamily: 'Nunito-ExtraBold',
+    fontSize: 16,
+    fontWeight: '800',
+    color: '#1a5c2a',
+    marginTop: 8,
+    marginBottom: 16,
+  },
+  imagePreview: {
+    width: '100%',
+    height: 220,
+    borderRadius: 14,
+    overflow: 'hidden',
+    marginBottom: 16,
+    backgroundColor: '#e8f5e9',
   },
   previewImage: { width: '100%', height: '100%' },
-
-  // Corner brackets
-  corner: { position: 'absolute', width: 20, height: 20, borderColor: COLORS.cyan },
-  cTL: { top: 8, left: 8, borderTopWidth: 2.5, borderLeftWidth: 2.5,   borderTopLeftRadius: 4 },
-  cTR: { top: 8, right: 8, borderTopWidth: 2.5, borderRightWidth: 2.5,  borderTopRightRadius: 4 },
-  cBL: { bottom: 8, left: 8, borderBottomWidth: 2.5, borderLeftWidth: 2.5,  borderBottomLeftRadius: 4 },
-  cBR: { bottom: 8, right: 8, borderBottomWidth: 2.5, borderRightWidth: 2.5, borderBottomRightRadius: 4 },
-
-  // Scan line
-  scanLine: {
-    position: 'absolute', left: 0, right: 0, height: 3,
-    backgroundColor: COLORS.cyan,
-    shadowColor: COLORS.cyan, shadowOffset: { width: 0, height: 0 },
-    shadowOpacity: 0.9, shadowRadius: 8, elevation: 4, opacity: 0.85,
+  pickerBtn:  { borderRadius: 12, paddingVertical: 14, alignItems: 'center' },
+  cameraBtn:  { backgroundColor: '#F97316' },
+  pickerBtnText: { color: '#ffffff', fontFamily: 'Nunito-Bold', fontWeight: '700', fontSize: 15 },
+  fileInfoRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#E8F5E9',
+    borderRadius: 10,
+    marginTop: 14,
+    padding: 12,
+  },
+  fileCheckBadge: {
+    width: 22, height: 22, borderRadius: 11,
+    backgroundColor: '#2d8c45',
+    alignItems: 'center', justifyContent: 'center',
+    marginRight: 10,
+  },
+  fileCheckBadgeText: { color: '#ffffff', fontSize: 13, fontWeight: 'bold' },
+  fileInfoText: {
+    color: '#2d8c45', fontSize: 13, flex: 1,
+    fontFamily: 'Nunito-Bold', fontWeight: '700',
   },
 
-  // Camera button
-  cameraButton: { borderRadius: 14, overflow: 'hidden', marginBottom: 10 },
-  cameraButtonInner: { paddingVertical: 15, alignItems: 'center', borderRadius: 14 },
-  cameraButtonText: { fontSize: 16, fontWeight: '700', color: COLORS.white, letterSpacing: 0.3 },
+  // -- Analyze Button --------------------------------------------------------
+  analyzeWrapper: { borderRadius: 16, overflow: 'hidden', marginBottom: 18 },
+  analyzeBtn: {
+    paddingVertical: 18,
+    alignItems: 'center',
+    justifyContent: 'center',
+    overflow: 'hidden',
+  },
+  shimmer: {
+    position: 'absolute',
+    top: 0, bottom: 0,
+    width: 60,
+    backgroundColor: 'rgba(255,255,255,0.28)',
+  },
+  analyzeBtnText: {
+    color: '#ffffff',
+    fontSize: 18,
+    fontFamily: 'Nunito-ExtraBold',
+    fontWeight: '800',
+    letterSpacing: 0.3,
+  },
 
-  // File ready
-  fileReadyBadge: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', paddingVertical: 8, gap: 8 },
-  readyDot: { width: 8, height: 8, borderRadius: 4, backgroundColor: COLORS.success },
-  fileReadyText: { fontSize: 13, color: COLORS.success, fontWeight: '600' },
-
-  // Loading
+  // -- Loading / Waveform ----------------------------------------------------
   loadingCard: {
-    borderRadius: 20, overflow: 'hidden', marginBottom: 16,
-    borderWidth: 1, borderColor: 'rgba(22,163,74,0.3)',
+    backgroundColor: '#ffffff',
+    borderRadius: 20,
+    padding: 30,
+    alignItems: 'center',
+    marginBottom: 18,
+    shadowColor: '#1a5c2a',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.08,
+    shadowRadius: 10,
+    elevation: 3,
   },
-  loadingGradient: { padding: 28, alignItems: 'center' },
-  spinnerRing: {
-    width: 90, height: 90, borderRadius: 45, overflow: 'hidden', marginBottom: 20,
-    shadowColor: COLORS.primary, shadowOffset: { width: 0, height: 0 },
-    shadowOpacity: 0.8, shadowRadius: 20, elevation: 10,
+  waveform: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    height: 60,
+    marginBottom: 16,
+    gap: 5,
   },
-  spinnerGradient: { flex: 1, alignItems: 'center', justifyContent: 'center' },
-  spinnerInner: { width: 72, height: 72, borderRadius: 36, backgroundColor: COLORS.bg, alignItems: 'center', justifyContent: 'center' },
-  spinnerPercent: { fontSize: 18, fontWeight: '900', color: COLORS.primaryLight },
-  loadingTitle: { fontSize: 17, fontWeight: '700', color: COLORS.text, marginBottom: 12 },
-  loadingDots: { flexDirection: 'row', alignItems: 'center', marginBottom: 10 },
-  loadingSubtitle: { fontSize: 13, color: COLORS.textMuted, textAlign: 'center', marginBottom: 20 },
-  loadingBarTrack: { width: '100%', height: 4, borderRadius: 2, backgroundColor: 'rgba(22,163,74,0.15)', overflow: 'hidden' },
-  loadingBarFill: { height: '100%', borderRadius: 2, backgroundColor: COLORS.primary },
+  waveBar:    { width: 8, height: 50, backgroundColor: '#3dba5c', borderRadius: 4 },
+  loadingText: {
+    fontSize: 15, color: '#1a5c2a',
+    fontFamily: 'Nunito-Bold', fontWeight: '700', marginBottom: 12,
+  },
+  bounceDots: { flexDirection: 'row', gap: 6 },
+  bounceDot:  { width: 9, height: 9, borderRadius: 4.5, backgroundColor: '#3dba5c' },
 
-  // Analyse button
-  analyseButton: { borderRadius: 16, overflow: 'hidden', marginBottom: 16 },
-  analyseButtonInner: { paddingVertical: 18, alignItems: 'center', borderRadius: 16 },
-  analyseButtonText: { fontSize: 18, fontWeight: '800', color: COLORS.white, letterSpacing: 0.5 },
-
-  // Result card
+  // -- Result Card -----------------------------------------------------------
   resultCard: {
-    backgroundColor: COLORS.bgCard, borderRadius: 24, overflow: 'hidden', marginBottom: 20,
-    borderWidth: 1, borderColor: COLORS.border,
-    shadowColor: '#000', shadowOffset: { width: 0, height: 8 }, shadowOpacity: 0.4, shadowRadius: 20, elevation: 12,
+    backgroundColor: '#ffffff',
+    borderRadius: 20,
+    borderWidth: 2.5,
+    padding: 24,
+    marginBottom: 18,
+    shadowColor: '#000000',
+    shadowOffset: { width: 0, height: 6 },
+    shadowOpacity: 0.1,
+    shadowRadius: 14,
+    elevation: 5,
   },
-  resultGlow: {
-    position: 'absolute', top: -30, left: '50%', marginLeft: -80,
-    width: 160, height: 80, borderRadius: 80, zIndex: 0,
+  resultLabel: {
+    fontFamily: 'PlayfairDisplay-Bold',
+    fontSize: 28,
+    fontWeight: 'bold',
+    textAlign: 'center',
+    marginBottom: 16,
   },
-  resultHeader: { padding: 28, alignItems: 'center', borderBottomWidth: 1, borderBottomColor: COLORS.border },
-  resultEmoji: { fontSize: 52, marginBottom: 10 },
-  resultName: { fontSize: 26, fontWeight: '900', textAlign: 'center', marginBottom: 12, letterSpacing: -0.3 },
-  resultPill: { borderRadius: 20, paddingHorizontal: 16, paddingVertical: 5, borderWidth: 1 },
-  resultPillText: { fontSize: 12, fontWeight: '700', letterSpacing: 0.5 },
-  confidenceSection: { padding: 20, borderBottomWidth: 1, borderBottomColor: COLORS.border },
-  confidenceSectionTitle: { fontSize: 13, fontWeight: '700', color: COLORS.textMuted, marginBottom: 12, textTransform: 'uppercase', letterSpacing: 1 },
-  barContainer: { marginBottom: 10 },
-  barLabelRow: { flexDirection: 'row', justifyContent: 'space-between', marginBottom: 6 },
-  barLabel: { fontSize: 13, color: COLORS.textMuted },
-  barValue: { fontSize: 13, fontWeight: '700' },
-  barTrack: { height: 8, borderRadius: 4, backgroundColor: 'rgba(255,255,255,0.06)', overflow: 'hidden' },
-  barFill: { height: '100%', borderRadius: 4 },
-  resultMessage: { fontSize: 14, color: COLORS.textMuted, textAlign: 'center', lineHeight: 22, padding: 20, paddingBottom: 0 },
-  actionRow: { flexDirection: 'row', padding: 20, gap: 12 },
-  actionBtn: { flex: 1, borderRadius: 12, paddingVertical: 13, alignItems: 'center' },
-  actionBtnReset: { backgroundColor: 'rgba(22,163,74,0.15)', borderWidth: 1, borderColor: 'rgba(22,163,74,0.4)' },
-  actionBtnBack: { backgroundColor: 'rgba(255,255,255,0.06)', borderWidth: 1, borderColor: COLORS.border },
-  actionBtnText: { fontSize: 14, fontWeight: '700', color: COLORS.text },
+  confBarTrack: {
+    height: 10,
+    backgroundColor: '#e8f5e9',
+    borderRadius: 5,
+    overflow: 'hidden',
+    marginBottom: 6,
+  },
+  confBarFill: { height: '100%', borderRadius: 5 },
+  confLabel: {
+    fontSize: 13, color: '#777777', textAlign: 'right', marginBottom: 14,
+    fontFamily: 'Nunito-Bold', fontWeight: '700',
+  },
+  resultMessage: {
+    fontSize: 14, color: '#555555', textAlign: 'center',
+    lineHeight: 22, marginBottom: 16,
+    fontFamily: 'Nunito-Bold', fontWeight: '600',
+  },
+  resultBtns: { flexDirection: 'row', gap: 10 },
+  resetBtn: {
+    flex: 1, backgroundColor: '#FF9800',
+    borderRadius: 10, paddingVertical: 13, alignItems: 'center',
+  },
+  resetBtnText: { color: '#ffffff', fontFamily: 'Nunito-Bold', fontWeight: '700', fontSize: 14 },
+  backBtn: {
+    flex: 1, backgroundColor: '#757575',
+    borderRadius: 10, paddingVertical: 13, alignItems: 'center',
+  },
+  backBtnText: { color: '#ffffff', fontFamily: 'Nunito-Bold', fontWeight: '700', fontSize: 14 },
 
-  // Detail header
-  detailHeader: { fontSize: 20, fontWeight: '800', color: COLORS.text, marginBottom: 14, marginTop: 4, letterSpacing: -0.3 },
+  // -- Detail Header ---------------------------------------------------------
+  detailHeader: {
+    fontSize: 20, fontWeight: '800', color: '#1a5c2a',
+    marginBottom: 14, marginTop: 4, letterSpacing: -0.3,
+  },
 
-  // Section cards (disease detail)
+  // -- Section Cards (disease detail) ----------------------------------------
   sectionCard: {
-    backgroundColor: COLORS.bgCard, borderRadius: 16, padding: 18, marginBottom: 12,
-    borderWidth: 1, borderColor: COLORS.border,
+    backgroundColor: '#ffffff',
+    borderRadius: 16, padding: 18, marginBottom: 12,
+    borderWidth: 1, borderColor: '#d4f5de',
+    shadowColor: '#1a5c2a',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.06, shadowRadius: 6, elevation: 2,
   },
-  sectionHeading: { fontSize: 16, fontWeight: '700', color: COLORS.text, marginBottom: 12 },
-  subHeading: { fontSize: 14, fontWeight: '600', color: COLORS.textMuted, marginBottom: 8 },
-  bodyText: { fontSize: 14, color: COLORS.textMuted, lineHeight: 22 },
-  bulletRow: { flexDirection: 'row', marginBottom: 6 },
-  bulletDot: { fontSize: 14, color: COLORS.primaryLight, marginRight: 8, marginTop: 1 },
-  bulletText: { fontSize: 14, color: COLORS.textMuted, lineHeight: 21, flex: 1 },
-  treatmentItem: { marginBottom: 12 },
-  treatmentHeading: { fontSize: 13, fontWeight: '700', color: COLORS.text, marginBottom: 3 },
-  treatmentBody: { fontSize: 13, color: COLORS.textMuted, lineHeight: 20 },
-  criticalBox: { borderWidth: 1.5, borderRadius: 10, padding: 14, marginTop: 14, backgroundColor: 'rgba(239,68,68,0.06)' },
+  sectionHeading: { fontSize: 16, fontWeight: '700', color: '#1a5c2a', marginBottom: 12 },
+  subHeading:     { fontSize: 14, fontWeight: '600', color: '#2d8c45', marginBottom: 8 },
+  bodyText:       { fontSize: 14, color: '#444444', lineHeight: 22 },
+  bulletRow:      { flexDirection: 'row', marginBottom: 6 },
+  bulletDot:      { fontSize: 14, color: '#3dba5c', marginRight: 8, marginTop: 1 },
+  bulletText:     { fontSize: 14, color: '#444444', lineHeight: 21, flex: 1 },
+  treatmentItem:    { marginBottom: 12 },
+  treatmentHeading: { fontSize: 13, fontWeight: '700', color: '#1a5c2a', marginBottom: 3 },
+  treatmentBody:    { fontSize: 13, color: '#555555', lineHeight: 20 },
+  criticalBox: {
+    borderWidth: 1.5, borderRadius: 10, padding: 14,
+    marginTop: 14, backgroundColor: 'rgba(239,68,68,0.04)',
+  },
   criticalTitle: { fontSize: 13, fontWeight: '700', marginBottom: 8 },
-  stepItem: { flexDirection: 'row', marginBottom: 16, alignItems: 'flex-start' },
-  stepBadge: { width: 30, height: 30, borderRadius: 15, alignItems: 'center', justifyContent: 'center', marginRight: 12, marginTop: 2 },
-  stepBadgeText: { color: COLORS.white, fontWeight: '900', fontSize: 13 },
-  stepContent: { flex: 1 },
-  stepHeading: { fontSize: 14, fontWeight: '700', color: COLORS.text, marginBottom: 4 },
-  stepBody: { fontSize: 13, color: COLORS.textMuted, lineHeight: 20 },
 
-  // Prevention Steps – alternating text/image card layout
+  // -- Healthy Card ----------------------------------------------------------
+  healthyCard:  { alignItems: 'center', padding: 24 },
+  healthyEmoji: { fontSize: 52, marginBottom: 12 },
+  healthyTitle: { fontSize: 22, fontWeight: '800', color: '#2d8c45', marginBottom: 10 },
+  healthyBody:  { fontSize: 14, color: '#555555', lineHeight: 22, textAlign: 'center' },
+
+  // -- Confidence Bar --------------------------------------------------------
+  barContainer: { marginBottom: 10 },
+  barLabelRow:  { flexDirection: 'row', justifyContent: 'space-between', marginBottom: 6 },
+  barLabel:     { fontSize: 13, color: '#555555' },
+  barValue:     { fontSize: 13, fontWeight: '700' },
+  barTrack:     { height: 8, borderRadius: 4, backgroundColor: '#e8f5e9', overflow: 'hidden' },
+  barFill:      { height: '100%', borderRadius: 4 },
+
+  // -- Prevention Steps ------------------------------------------------------
   psSection: { marginBottom: 4 },
   psSectionHeader: {
-    backgroundColor: '#0D1A09',
-    borderRadius: 16,
-    padding: 24,
-    marginBottom: 10,
-    alignItems: 'center',
-    borderWidth: 1,
-    borderColor: '#2A4A1F',
+    backgroundColor: '#f0faf2',
+    borderRadius: 16, padding: 20, marginBottom: 10,
+    alignItems: 'center', borderWidth: 1, borderColor: '#c8e6c9',
   },
   psSectionTitle: {
-    fontSize: 20,
-    fontWeight: '800',
-    textAlign: 'center',
-    lineHeight: 28,
-    marginBottom: 10,
-    letterSpacing: -0.3,
+    fontSize: 18, fontWeight: '800', textAlign: 'center',
+    lineHeight: 26, marginBottom: 8, letterSpacing: -0.3,
   },
-  psSectionSubtitle: {
-    fontSize: 13,
-    color: COLORS.textMuted,
-    textAlign: 'center',
-    lineHeight: 20,
-  },
-  // Card container
+  psSectionSubtitle: { fontSize: 13, color: '#555555', textAlign: 'center', lineHeight: 20 },
   psCard: {
-    borderRadius: 14,
-    marginBottom: 10,
-    overflow: 'hidden',
-    borderWidth: 1,
-    borderColor: '#2A4A1F',
-    backgroundColor: '#0D1A09',
+    borderRadius: 14, marginBottom: 10, overflow: 'hidden',
+    borderWidth: 1, borderColor: '#c8e6c9', backgroundColor: '#ffffff',
   },
-  // Row layout for alternating image/text
-  psCardRow: {
-    flexDirection: 'row',
-    minHeight: 220,
-  },
-  // Text panel (55% width)
-  psTextPanel: {
-    flex: 55,
-    padding: 16,
-    justifyContent: 'center',
-  },
-  // Image panel (45% width)
-  psImagePanel: {
-    flex: 45,
-    overflow: 'hidden',
-  },
-  psStepImage: {
-    width: '100%',
-    height: '100%',
-    minHeight: 220,
-  },
-  // Step badge inside text panel
+  psCardRow:    { flexDirection: 'row', minHeight: 220 },
+  psTextPanel:  { flex: 55, padding: 16, justifyContent: 'center' },
+  psImagePanel: { flex: 45, overflow: 'hidden' },
+  psStepImage:  { width: '100%', height: '100%', minHeight: 220 },
   psStepBadge: {
-    alignSelf: 'flex-start',
-    backgroundColor: '#1A5C2A',
-    paddingHorizontal: 12,
-    paddingVertical: 5,
-    borderRadius: 6,
-    marginBottom: 10,
+    alignSelf: 'flex-start', backgroundColor: '#2d8c45',
+    paddingHorizontal: 12, paddingVertical: 5, borderRadius: 6, marginBottom: 10,
   },
   psStepBadgeText: {
-    color: '#FFFFFF',
-    fontWeight: '800',
-    fontSize: 12,
-    letterSpacing: 1.5,
-    textTransform: 'uppercase',
+    color: '#ffffff', fontWeight: '800', fontSize: 12,
+    letterSpacing: 1.5, textTransform: 'uppercase',
   },
-  // Text-only fallback (no image)
-  psBanner: {
-    paddingHorizontal: 18,
-    paddingVertical: 9,
-  },
+  psBanner:     { paddingHorizontal: 18, paddingVertical: 9 },
   psBannerLabel: {
-    color: '#FFFFFF',
-    fontWeight: '800',
-    fontSize: 13,
-    letterSpacing: 1.5,
-    textTransform: 'uppercase',
+    color: '#ffffff', fontWeight: '800', fontSize: 13,
+    letterSpacing: 1.5, textTransform: 'uppercase',
   },
-  psContent: {
-    padding: 18,
-  },
-  psHeading: {
-    fontSize: 15,
-    fontWeight: '700',
-    color: COLORS.text,
-    marginBottom: 8,
-  },
-  psBody: {
-    fontSize: 13,
-    color: COLORS.textMuted,
-    lineHeight: 21,
-  },
-  psLinkRow: {
-    marginTop: 12,
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  psLinkText: {
-    fontSize: 13,
-    color: '#4CAF50',
-    fontWeight: '600',
-  },
-  sourceCard: { alignItems: 'center' },
-  sourceTitle: { fontSize: 12, color: COLORS.textFaint, marginBottom: 6, textTransform: 'uppercase', letterSpacing: 1 },
-  sourceLink: { fontSize: 13, textDecorationLine: 'underline', textAlign: 'center' },
-  healthyCard: { alignItems: 'center', padding: 24 },
-  healthyEmoji: { fontSize: 52, marginBottom: 12 },
-  healthyTitle: { fontSize: 22, fontWeight: '800', color: COLORS.success, marginBottom: 10 },
-  healthyBody: { fontSize: 14, color: COLORS.textMuted, lineHeight: 22, textAlign: 'center' },
+  psContent: { padding: 18 },
+  psHeading: { fontSize: 15, fontWeight: '700', color: '#1a5c2a', marginBottom: 8 },
+  psBody:    { fontSize: 13, color: '#444444', lineHeight: 21 },
 
-  // Instructions
-  instructionsCard: { borderRadius: 20, overflow: 'hidden', marginBottom: 16, borderWidth: 1, borderColor: 'rgba(22,163,74,0.2)' },
-  instructionsGradient: { padding: 20 },
-  instructionsTitle: { fontSize: 15, fontWeight: '700', color: COLORS.text, marginBottom: 16 },
-  tipRow: { flexDirection: 'row', alignItems: 'flex-start', marginBottom: 12 },
-  tipBadge: { width: 22, height: 22, borderRadius: 11, alignItems: 'center', justifyContent: 'center', marginRight: 10, marginTop: 1, flexShrink: 0 },
-  tipBadgeText: { color: COLORS.white, fontSize: 12, fontWeight: '800' },
-  tipText: { fontSize: 13, color: COLORS.textMuted, lineHeight: 20, flex: 1 },
-  diseaseChips: { marginTop: 16 },
-  diseaseChipsLabel: { fontSize: 12, color: COLORS.textFaint, marginBottom: 10, textTransform: 'uppercase', letterSpacing: 1 },
-  chipRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 8 },
-  diseaseChip: { flexDirection: 'row', alignItems: 'center', borderRadius: 20, paddingHorizontal: 12, paddingVertical: 5, borderWidth: 1, backgroundColor: 'rgba(255,255,255,0.04)', gap: 6 },
-  diseaseDot: { width: 7, height: 7, borderRadius: 3.5 },
-  diseaseChipText: { fontSize: 12, fontWeight: '600' },
-
-  // Linked info
-  linkedInfo: {
-    borderRadius: 12, padding: 14, backgroundColor: 'rgba(22,163,74,0.08)',
-    borderWidth: 1, borderColor: 'rgba(22,163,74,0.2)', marginBottom: 10,
+  // -- Instructions ----------------------------------------------------------
+  instructionsBox: {
+    backgroundColor: '#fff8e1',
+    borderRadius: 16, borderWidth: 1.5, borderColor: '#ffca28',
+    padding: 18, marginTop: 4,
   },
-  linkedInfoText: { fontSize: 12, color: COLORS.primaryLight, textAlign: 'center', fontWeight: '600' },
+  instructionsTitle: {
+    fontFamily: 'Nunito-ExtraBold', fontSize: 15, fontWeight: '800',
+    color: '#e65100', marginBottom: 14,
+  },
+  instructionItem:  { flexDirection: 'row', alignItems: 'flex-start', marginBottom: 12 },
+  instrNumBadge: {
+    width: 24, height: 24, borderRadius: 12, backgroundColor: '#ff6d00',
+    alignItems: 'center', justifyContent: 'center', marginRight: 10, marginTop: 1,
+  },
+  instrNumText: { color: '#ffffff', fontSize: 12, fontWeight: 'bold' },
+  instructionText: {
+    flex: 1, fontSize: 13.5, color: '#bf360c', lineHeight: 20,
+    fontFamily: 'Nunito-Bold', fontWeight: '600',
+  },
+
+  // -- Toast -----------------------------------------------------------------
+  toast: {
+    position: 'absolute', bottom: 30, left: 20, right: 20,
+    backgroundColor: '#1a5c2a', borderRadius: 12, padding: 14, alignItems: 'center',
+    shadowColor: '#000000',
+    shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.3, shadowRadius: 8, elevation: 8,
+  },
+  toastText: { color: '#ffffff', fontFamily: 'Nunito-Bold', fontWeight: '700', fontSize: 14 },
 });
 
 export default DroppingUploadScreen;
