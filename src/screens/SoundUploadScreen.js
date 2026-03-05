@@ -634,13 +634,13 @@ const styles = StyleSheet.create({
     marginBottom: 16,
   },
   pickBtn: {
-    backgroundColor: '#1565C0',
+    backgroundColor: '#F97316',
     borderRadius: 12,
     paddingVertical: 14,
     alignItems: 'center',
   },
   pickBtnChanged: {
-    backgroundColor: '#0D47A1',
+    backgroundColor: '#EA6C0A',
   },
   pickBtnText: {
     color: '#ffffff',
