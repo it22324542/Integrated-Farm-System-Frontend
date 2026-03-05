@@ -960,9 +960,6 @@ const DroppingUploadScreen = ({ navigation, route }) => {
               <LinearGradient colors={[COLORS.primary, COLORS.cyan]} style={styles.stepChip} start={{ x: 0, y: 0 }} end={{ x: 1, y: 0 }}>
                 <Text style={styles.stepChipText}>STEP 3</Text>
               </LinearGradient>
-              <View style={styles.aiChip}>
-                <Text style={styles.aiChipText}>{'\u26A1'} AI POWERED</Text>
-              </View>
             </View>
             <Text style={styles.headerTitle}>Disease{'\n'}Detection</Text>
             <Text style={styles.headerSubtitle}>
@@ -1109,15 +1106,6 @@ const DroppingUploadScreen = ({ navigation, route }) => {
 
             <Text style={styles.resultMessage}>{result.message}</Text>
 
-            {/* Actions */}
-            <View style={styles.actionRow}>
-              <AnimatedPressable onPress={resetUpload} style={[styles.actionBtn, styles.actionBtnReset]}>
-                <Text style={styles.actionBtnText}>{'\u21BA'}  New Scan</Text>
-              </AnimatedPressable>
-              <AnimatedPressable onPress={() => navigation.goBack()} style={[styles.actionBtn, styles.actionBtnBack]}>
-                <Text style={styles.actionBtnText}>{'\u2190'} Back</Text>
-              </AnimatedPressable>
-            </View>
           </Animated.View>
         )}
 
