@@ -48,6 +48,7 @@ const RootNavigator = () => {
           name="ImageUpload" 
           component={ImageUploadScreen}
           options={{ 
+            headerShown: false,
             title: 'Image Analysis',
           }}
         />
@@ -57,6 +58,7 @@ const RootNavigator = () => {
           name="DroppingUpload"
           component={DroppingUploadScreen}
           options={{
+            headerShown: false,
             title: 'Disease Detection',
           }}
         />
