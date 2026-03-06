@@ -14,7 +14,80 @@ import * as DocumentPicker from 'expo-document-picker';
 import { LinearGradient } from 'expo-linear-gradient';
 import { uploadSound } from '../services/poultryService';
 
-const { width: SCREEN_WIDTH } = Dimensions.get('window');
+const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get('window');
+
+// ── Floating Bubbles ─────────────────────────────────────────────────────────
+const BUBBLE_COLORS = ['#3dba5c', '#7ed99a', '#d4f5de', '#2d8c45', '#a8e6ba'];
+
+const bubbleData = Array.from({ length: 18 }, () => ({
+  size: Math.random() * 12 + 4,
+  x: Math.random() * SCREEN_WIDTH,
+  duration: (Math.random() * 15 + 10) * 1000,
+  delay: Math.random() * 10000,
+  color: BUBBLE_COLORS[Math.floor(Math.random() * BUBBLE_COLORS.length)],
+}));
+
+const FloatingBubbles = () => {
+  const animValues = useRef(
+    Array.from({ length: 18 }, () => new Animated.Value(0))
+  ).current;
+
+  useEffect(() => {
+    const animations = animValues.map((anim, i) => {
+      const { duration, delay } = bubbleData[i];
+      return Animated.sequence([
+        Animated.delay(delay),
+        Animated.loop(
+          Animated.timing(anim, {
+            toValue: 1,
+            duration,
+            useNativeDriver: true,
+          })
+        ),
+      ]);
+    });
+
+    Animated.parallel(animations).start();
+    return () => animations.forEach(a => a.stop());
+  }, []);
+
+  return (
+    <View style={StyleSheet.absoluteFillObject} pointerEvents="none">
+      {bubbleData.map((bubble, i) => {
+        const anim = animValues[i];
+        const translateY = anim.interpolate({
+          inputRange: [0, 1],
+          outputRange: [SCREEN_HEIGHT, -100],
+        });
+        const opacity = anim.interpolate({
+          inputRange: [0, 0.3, 0.7, 1],
+          outputRange: [0, 0.6, 0.3, 0],
+        });
+        const scale = anim.interpolate({
+          inputRange: [0, 1],
+          outputRange: [0, 1.2],
+        });
+        return (
+          <Animated.View
+            key={i}
+            style={[
+              {
+                position: 'absolute',
+                left: bubble.x,
+                top: 0,
+                width: bubble.size,
+                height: bubble.size,
+                borderRadius: bubble.size / 2,
+                backgroundColor: bubble.color,
+              },
+              { opacity, transform: [{ translateY }, { scale }] },
+            ]}
+          />
+        );
+      })}
+    </View>
+  );
+};
 
 const SoundUploadScreen = ({ navigation }) => {
   // ── Existing state (unchanged) ──────────────────────────────────────────
@@ -281,6 +354,8 @@ const SoundUploadScreen = ({ navigation }) => {
   // ── Render ───────────────────────────────────────────────────────────────
   return (
     <View style={styles.root}>
+
+      <FloatingBubbles />
 
       {/* ── Sticky Header ─────────────────────────────────────────────── */}
       <LinearGradient colors={['#1a5c2a', '#3dba5c']} style={styles.header}>
