@@ -5,10 +5,11 @@ import {
   TouchableOpacity,
   StyleSheet,
   ScrollView,
-  Dimensions
+  Dimensions,
+  ImageBackground,
 } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
-import { COLORS } from '../constants/theme';
+import { COLORS } from '../constants/theme'; // assuming you have this
 
 const { width } = Dimensions.get('window');
 
@@ -20,79 +21,92 @@ const HomeScreen = ({ navigation }) => {
   return (
     <View style={styles.container}>
       <StatusBar style="light" />
-      
-      <ScrollView 
-        contentContainerStyle={styles.content}
+
+      <ScrollView
+        contentContainerStyle={styles.scrollContent}
         showsVerticalScrollIndicator={false}
       >
-        {/* Hero Section */}
-        <View style={styles.heroSection}>
+        {/* Hero Section - Eye-catching gradient background */}
+        <ImageBackground
+          source={{ uri: 'https://images.unsplash.com/photo-1506361797048-46a149213205?auto=format&fit=crop&q=80' }} // ← egg/farm related image or your own asset
+          style={styles.hero}
+          imageStyle={styles.heroImage}
+        >
           <View style={styles.heroOverlay}>
-            <Text style={styles.heroSubtitle}>Integrated Efficient Poultry & Egg Production</Text>
+            <Text style={styles.heroSubtitle}>SMART POULTRY SOLUTION</Text>
             <Text style={styles.heroTitle}>Professional Egg Analysis</Text>
-            <Text style={styles.heroTagline}>Always Accurate And Honest</Text>
+            <Text style={styles.heroTagline}>
+              Accurate • Fast • Trusted by Farmers
+            </Text>
 
+            <TouchableOpacity
+              style={styles.heroButton}
+              onPress={() => navigateToScreen('DailySummary')}
+            >
+              <Text style={styles.heroButtonText}>View Today's Summary</Text>
+            </TouchableOpacity>
           </View>
-        </View>
+        </ImageBackground>
 
-        {/* Feature Cards - 4 Cards Layout */}
-        <View style={styles.featuresWrapper}>
-          <View style={styles.cardsGrid}>
-            {/* Card 1 */}
-            <TouchableOpacity 
-              style={[styles.card, styles.cardNormal]}
+        {/* Features - Glassmorphism cards */}
+        <View style={styles.featuresSection}>
+          <Text style={styles.sectionTitle}>Core Features</Text>
+
+          <View style={styles.cardsContainer}>
+            <TouchableOpacity
+              style={styles.glassCard}
               onPress={() => navigateToScreen('EggGrading')}
-              activeOpacity={0.9}
+              activeOpacity={0.88}
             >
               <Text style={styles.cardIcon}>📏</Text>
               <Text style={styles.cardTitle}>Egg Grading</Text>
-              <Text style={styles.cardDescription}>
-                Precise measurement-based classification
-              </Text>
+              <Text style={styles.cardDesc}>Weight & size based classification</Text>
             </TouchableOpacity>
 
-            {/* Card 2 */}
-            <TouchableOpacity 
-              style={[styles.card, styles.cardNormal]}
+            <TouchableOpacity
+              style={styles.glassCard}
               onPress={() => navigateToScreen('EggQuality')}
-              activeOpacity={0.9}
+              activeOpacity={0.88}
             >
-              <Text style={styles.cardIcon}>📸</Text>
+              <Text style={styles.cardIcon}>🔍</Text>
               <Text style={styles.cardTitle}>Quality Check</Text>
-              <Text style={styles.cardDescription}>
-                Image-based quality detection
-              </Text>
+              <Text style={styles.cardDesc}>AI-powered defect detection</Text>
             </TouchableOpacity>
 
-            {/* Card 3 */}
-
-
+            <TouchableOpacity
+              style={styles.glassCard}
+              onPress={() => navigateToScreen('DailySummary')}
+              activeOpacity={0.88}
+            >
+              <Text style={styles.cardIcon}>📊</Text>
+              <Text style={styles.cardTitle}>Daily Summary</Text>
+              <Text style={styles.cardDesc}>Trends & insights at a glance</Text>
+            </TouchableOpacity>
           </View>
         </View>
 
-        {/* Why Choose Section */}
-        <View style={styles.whySection}>
-          <Text style={styles.whySubtitle}>WHY CHOOSE US</Text>
-          <Text style={styles.whyTitle}>Professional Grade</Text>
-          <Text style={styles.whyDescription}>
-            Our advanced AI models deliver industry-leading accuracy for egg grading and quality assessment. Trusted by professionals worldwide.
-          </Text>
-        </View>
-
-        {/* Stats Section */}
+        {/* Stats - eye-catching numbers */}
         <View style={styles.statsSection}>
-          <View style={styles.statItem}>
+          <View style={styles.statCircle}>
             <Text style={styles.statNumber}>98%</Text>
             <Text style={styles.statLabel}>Accuracy</Text>
           </View>
-          <View style={styles.statItem}>
-            <Text style={styles.statNumber}>{'<'}1s</Text>
-            <Text style={styles.statLabel}>Speed</Text>
+          <View style={styles.statCircle}>
+            <Text style={styles.statNumber}>&lt;1s</Text>
+            <Text style={styles.statLabel}>Analysis</Text>
           </View>
-          <View style={styles.statItem}>
+          <View style={styles.statCircle}>
             <Text style={styles.statNumber}>24/7</Text>
-            <Text style={styles.statLabel}>Available</Text>
+            <Text style={styles.statLabel}>Support</Text>
           </View>
+        </View>
+
+        {/* Why Choose Us */}
+        <View style={styles.whySection}>
+          <Text style={styles.whyTitle}>Why Farmers Choose Us</Text>
+          <Text style={styles.whyText}>
+            Cutting-edge AI technology combined with years of poultry expertise delivers reliable results you can trust every day.
+          </Text>
         </View>
       </ScrollView>
     </View>
@@ -102,339 +116,174 @@ const HomeScreen = ({ navigation }) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor:  COLORS.neutral.white,
+    backgroundColor: COLORS.neutral.white || '#f8f9fa',
   },
-  content: {
-    paddingBottom: 60,
+  scrollContent: {
+    paddingBottom: 40,
   },
-  
-  /* Hero Section */
-  heroSection: {
-    height: 420,
-    backgroundColor: COLORS. accent,
-    justifyContent:  'center',
-    alignItems: 'center',
-    paddingHorizontal: 24,
-    position: 'relative',
-    overflow: 'hidden',
+
+  // Hero
+  hero: {
+    height: 480,
+    justifyContent: 'center',
+  },
+  heroImage: {
+    opacity: 0.35,
   },
   heroOverlay: {
+    ...StyleSheet.absoluteFillObject,
+    backgroundColor: 'rgba(0,0,0,0.38)',
+    justifyContent: 'center',
     alignItems: 'center',
-    zIndex: 1,
+    paddingHorizontal: 28,
   },
   heroSubtitle: {
-    fontSize: 14,
+    fontSize: 15,
     fontWeight: '700',
-    color: COLORS.secondary,
-    letterSpacing: 2,
-    marginBottom: 16,
+    color: '#ffd60a',
+    letterSpacing: 2.5,
+    marginBottom: 12,
     textTransform: 'uppercase',
-    opacity: 0.95,
   },
   heroTitle: {
-    fontSize: 48,
+    fontSize: 46,
     fontWeight: '900',
-    color: COLORS. neutral.white,
+    color: '#ffffff',
     textAlign: 'center',
+    lineHeight: 52,
     marginBottom: 12,
     letterSpacing: -1,
-    lineHeight: 54,
   },
   heroTagline: {
     fontSize: 20,
-    color: COLORS. neutral.white,
+    color: '#ffffff',
     textAlign: 'center',
-    marginBottom: 40,
-    fontWeight: '400',
-    opacity: 0.92,
-    maxWidth: '85%',
-    lineHeight: 28,
+    marginBottom: 32,
+    opacity: 0.95,
+    maxWidth: '80%',
   },
-  heroCTA: {
-    backgroundColor: COLORS.primary,
-    paddingHorizontal:  42,
-    paddingVertical:  16,
-    borderRadius:  30,
-    shadowColor: COLORS.primary,
-    shadowOffset: { width: 0, height:  6 },
-    shadowOpacity: 0.4,
-    shadowRadius: 12,
-    elevation: 8,
+  heroButton: {
+    backgroundColor: COLORS.primary || '#e63946',
+    paddingVertical: 16,
+    paddingHorizontal: 40,
+    borderRadius: 50,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 6 },
+    shadowOpacity: 0.35,
+    shadowRadius: 10,
+    elevation: 10,
   },
-  heroCTAText: {
-    color: COLORS.neutral.white,
-    fontSize: 18,
+  heroButtonText: {
+    color: '#fff',
+    fontSize: 17,
     fontWeight: '700',
-    letterSpacing: 0.8,
+    letterSpacing: 0.6,
   },
 
-  /* Cards Grid */
-  featuresWrapper: {
+  // Features
+  featuresSection: {
     paddingHorizontal: 20,
-    paddingVertical:  40,
-    backgroundColor:  COLORS.neutral.white,
-  },
-  sectionHeader: {
-    marginBottom: 28,
-  },
-  sectionLabel: {
-    fontSize: 13,
-    fontWeight: '700',
-    color: COLORS. secondary,
-    letterSpacing:  1.5,
-    marginBottom: 8,
-    textTransform: 'uppercase',
+    paddingVertical: 40,
   },
   sectionTitle: {
-    fontSize: 32,
+    fontSize: 28,
     fontWeight: '800',
-    color: COLORS. accent,
-    marginBottom: 12,
-    letterSpacing: -0.5,
+    color: COLORS.accent || '#2a9d8f',
+    marginBottom: 28,
+    textAlign: 'center',
+    letterSpacing: -0.4,
   },
-  cardsGrid: {
+  cardsContainer: {
     flexDirection: 'row',
     flexWrap: 'wrap',
     justifyContent: 'space-between',
     gap: 16,
   },
-  card:  {
-    width: '48%',
-    borderRadius: 16,
-    padding: 20,
+  glassCard: {
+    width: (width - 56) / 2,
+    backgroundColor: 'rgba(255,255,255,0.78)',
+    borderRadius: 24,
+    padding: 24,
     alignItems: 'center',
+    borderWidth: 1,
+    borderColor: 'rgba(255,255,255,0.4)',
     shadowColor: '#000',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity:  0.1,
-    shadowRadius: 8,
-    elevation: 3,
-    minHeight: 160,
-    justifyContent: 'center',
-  },
-  cardNormal: {
-    backgroundColor:  COLORS.neutral.white,
-    borderWidth: 1.5,
-    borderColor:  COLORS.neutral.lighter,
-  },
-  cardFeatured:  {
-    width: '100%',
-    backgroundColor: COLORS.primary,
-    marginTop: 8,
-    minHeight: 180,
+    shadowOffset: { width: 0, height: 8 },
     shadowOpacity: 0.15,
-    shadowRadius: 12,
-    elevation: 5,
+    shadowRadius: 16,
+    elevation: 8,
+    backdropFilter: 'blur(10px)', // note: works on web/modern RN, fallback on old devices
   },
   cardIcon: {
-    fontSize: 40,
-    marginBottom: 16,
-  },
-  cardIconFeatured: {
     fontSize: 48,
-    marginBottom: 18,
+    marginBottom: 16,
   },
   cardTitle: {
     fontSize: 18,
     fontWeight: '700',
-    color: COLORS. accent,
+    color: COLORS.accent || '#264653',
+    marginBottom: 8,
     textAlign: 'center',
-    marginBottom:  8,
-    letterSpacing: -0.3,
   },
-  cardTitleFeatured: {
-    fontSize: 20,
-    fontWeight: '800',
-    color: COLORS. neutral.white,
-    textAlign: 'center',
-    marginBottom: 10,
-    letterSpacing: -0.3,
-  },
-  cardDescription: {
+  cardDesc: {
     fontSize: 14,
-    color: COLORS. neutral.dark,
+    color: '#555',
     textAlign: 'center',
     lineHeight: 20,
-    fontWeight: '400',
-  },
-  cardDescriptionFeatured: {
-    fontSize: 15,
-    color: COLORS. neutral.white,
-    textAlign: 'center',
-    lineHeight: 22,
-    fontWeight: '400',
-    opacity: 0.95,
-  },
-  cardBadge: {
-    marginTop: 12,
-    backgroundColor: 'rgba(255,255,255,0.2)',
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-    borderRadius: 12,
-  },
-  cardBadgeText: {
-    color: COLORS.neutral.white,
-    fontSize: 11,
-    fontWeight: '700',
-    textTransform: 'uppercase',
-    letterSpacing: 1,
   },
 
-  /* Why Section */
-  whySection:  {
-    paddingHorizontal: 24,
-    paddingVertical:  48,
-    backgroundColor:  COLORS.neutral.light,
-  },
-  whySubtitle: {
-    fontSize: 13,
-    fontWeight: '700',
-    color:  COLORS.secondary,
-    letterSpacing: 1.5,
-    marginBottom: 10,
-    textTransform: 'uppercase',
-  },
-  whyTitle: {
-    fontSize: 40,
-    fontWeight: '900',
-    color: COLORS. accent,
-    marginBottom: 18,
-    letterSpacing: -0.8,
-    lineHeight: 46,
-  },
-  whyDescription: {
-    fontSize: 16,
-    color: COLORS.neutral.dark,
-    lineHeight: 26,
-    fontWeight: '400',
-  },
-
-  /* Features List */
-  featuresList: {
-    marginTop: 32,
-  },
-  featureItem: {
-    flexDirection: 'row',
-    alignItems: 'flex-start',
-    marginBottom:  20,
-    paddingVertical: 12,
-    paddingHorizontal: 16,
-    backgroundColor: COLORS.neutral.white,
-    borderRadius: 12,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.05,
-    shadowRadius: 4,
-    elevation: 1,
-  },
-  featureIcon: {
-    fontSize: 24,
-    marginRight: 16,
-    marginTop: 2,
-  },
-  featureContent: {
-    flex: 1,
-  },
-  featureTitle: {
-    fontSize: 16,
-    fontWeight: '700',
-    color: COLORS.accent,
-    marginBottom: 4,
-  },
-  featureText: {
-    fontSize: 14,
-    color: COLORS. neutral.dark,
-    lineHeight: 20,
-    fontWeight: '400',
-  },
-
-  /* Stats Section */
+  // Stats
   statsSection: {
-    paddingHorizontal: 20,
-    paddingVertical:  40,
-    backgroundColor:  COLORS.neutral.white,
     flexDirection: 'row',
     justifyContent: 'space-around',
-    flexWrap: 'wrap',
-    gap: 24,
+    paddingVertical: 40,
+    paddingHorizontal: 20,
+    backgroundColor: COLORS.neutral.light || '#f1f5f9',
   },
-  statItem: {
+  statCircle: {
     alignItems: 'center',
-    minWidth: 100,
+    backgroundColor: 'rgba(255,255,255,0.9)',
+    borderRadius: 999,
+    width: 110,
+    height: 110,
+    justifyContent: 'center',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.12,
+    shadowRadius: 10,
+    elevation: 6,
   },
   statNumber: {
-    fontSize: 36,
+    fontSize: 34,
     fontWeight: '900',
-    color: COLORS. primary,
-    marginBottom: 6,
-    letterSpacing: -1,
+    color: COLORS.primary || '#e63946',
+    marginBottom: 4,
   },
   statLabel: {
-    fontSize: 14,
-    color: COLORS. neutral.dark,
+    fontSize: 13,
+    color: '#666',
     fontWeight: '600',
-    textAlign: 'center',
   },
 
-  /* CTA Section */
-  ctaSection: {
-    paddingHorizontal: 24,
-    paddingVertical:  48,
-    backgroundColor: COLORS. accent,
+  // Why section
+  whySection: {
+    paddingHorizontal: 28,
+    paddingVertical: 48,
     alignItems: 'center',
   },
-  ctaTitle: {
+  whyTitle: {
     fontSize: 32,
     fontWeight: '800',
-    color: COLORS. neutral.white,
-    textAlign: 'center',
+    color: COLORS.accent || '#2a9d8f',
     marginBottom: 16,
-    letterSpacing: -0.5,
-  },
-  ctaDescription: {
-    fontSize: 16,
-    color: COLORS. neutral.white,
     textAlign: 'center',
-    marginBottom: 32,
-    opacity: 0.9,
-    lineHeight: 24,
+  },
+  whyText: {
+    fontSize: 16,
+    color: '#444',
+    textAlign: 'center',
+    lineHeight: 26,
     maxWidth: '85%',
-  },
-  ctaButton: {
-    backgroundColor: COLORS.primary,
-    paddingHorizontal: 40,
-    paddingVertical:  16,
-    borderRadius:  30,
-    shadowColor:  '#000',
-    shadowOffset: { width: 0, height: 6 },
-    shadowOpacity: 0.3,
-    shadowRadius: 12,
-    elevation: 8,
-  },
-  ctaButtonText: {
-    color:  COLORS.neutral.white,
-    fontSize: 18,
-    fontWeight: '700',
-    letterSpacing: 0.5,
-  },
-
-  /* Footer */
-  footer: {
-    paddingHorizontal: 24,
-    paddingVertical:  32,
-    backgroundColor: COLORS. neutral.lighter,
-    alignItems: 'center',
-  },
-  footerText: {
-    fontSize: 14,
-    color: COLORS.neutral.dark,
-    textAlign: 'center',
-    lineHeight: 20,
-  },
-  footerBrand: {
-    fontSize: 16,
-    fontWeight: '700',
-    color: COLORS.accent,
-    marginBottom: 8,
   },
 });
 

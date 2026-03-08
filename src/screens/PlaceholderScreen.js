@@ -1,14 +1,14 @@
 import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 
-/**
- * Placeholder Screen
- * Example screen structure - replace with actual screens
- */
 const PlaceholderScreen = () => {
   return (
     <View style={styles.container}>
-      <Text style={styles.text}>Placeholder Screen</Text>
+      <Text style={styles.emoji}>🥚👷‍♂️</Text>
+      <Text style={styles.bigText}>Egg-citement Loading...</Text>
+      <Text style={styles.smallText}>
+        This screen is still in the incubator 🐣
+      </Text>
     </View>
   );
 };
@@ -16,12 +16,27 @@ const PlaceholderScreen = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+    backgroundColor: '#f0f9ff',
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: '#fff',
+    padding: 40,
   },
-  text: {
+  emoji: {
+    fontSize: 80,
+    marginBottom: 24,
+  },
+  bigText: {
+    fontSize: 28,
+    fontWeight: '800',
+    color: '#1d4ed8',
+    marginBottom: 12,
+    textAlign: 'center',
+  },
+  smallText: {
     fontSize: 16,
+    color: '#64748b',
+    textAlign: 'center',
+    lineHeight: 24,
   },
 });
 

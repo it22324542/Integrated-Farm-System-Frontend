@@ -7,7 +7,7 @@ import { COLORS } from './src/constants/theme';
 import HomeScreen from './src/screens/HomeScreen';
 import EggGradingScreen from './src/screens/EggGradingScreen';
 import EggQualityScreen from './src/screens/EggQualityScreen';
-
+import EggSummaryScreen from './src/screens/EggSummaryScreen';
 const Stack = createNativeStackNavigator();
 
 export default function App() {
@@ -48,6 +48,11 @@ export default function App() {
           name="EggQuality" 
           component={EggQualityScreen}
           options={{ title: 'Egg Quality Detection' }}
+        />
+        <Stack.Screen 
+          name="DailySummary" 
+          component={EggSummaryScreen}
+          options={{ title: 'Daily Summary' }}
         />
       </Stack.Navigator>
     </NavigationContainer>

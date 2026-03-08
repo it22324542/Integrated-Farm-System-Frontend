@@ -19,7 +19,7 @@ const API_CONFIG = {
 
 // Egg Grading API (existing)
 export const EggGradingAPI = {
-  predictGrade: async (height, diameter, weight) => {
+  predictGrade: async (height, diameter, weight, cageNo) => {
     try {
       const response = await fetch(
         `${API_CONFIG.BASE_URL}${API_CONFIG.ENDPOINTS. GRADING_PREDICT}`,
@@ -28,7 +28,7 @@ export const EggGradingAPI = {
           headers: {
             'Content-Type': 'application/json',
           },
-          body: JSON.stringify({ height, diameter, weight })
+          body: JSON.stringify({ height, diameter, weight, cageNo })
         }
       );
       return await response.json();
@@ -91,23 +91,26 @@ export const EggQualityAPI = {
     }
   },
 
-  predictQualityBase64: async (base64Image) => {
-    try {
-      const response = await fetch(
-        `${API_CONFIG.BASE_URL}${API_CONFIG.ENDPOINTS. QUALITY_BASE64}`,
-        {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({ image: base64Image })
-        }
-      );
-      return await response.json();
-    } catch (error) {
-      throw new Error('Network error: ' + error.message);
-    }
-  },
+  predictQualityBase64: async (base64Image, cageNo) => {
+  try {
+    const response = await fetch(
+      `${API_CONFIG.BASE_URL}${API_CONFIG.ENDPOINTS.QUALITY_BASE64}`,
+      {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          image: base64Image,
+          cageNo: cageNo,
+        }),
+      }
+    );
+    return await response.json();
+  } catch (error) {
+    throw new Error('Network error: ' + error.message);
+  }
+},
 
   getModelInfo: async () => {
     try {
