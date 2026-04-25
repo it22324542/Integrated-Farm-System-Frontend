@@ -1,4 +1,4 @@
-// Placeholder component index
-// Add reusable components here as they are created
-
+// Reusable Components
 export { default as Placeholder } from './Placeholder';
+export { default as Header } from './Header';
+export { default as CustomDrawerContent } from './CustomDrawerContent';

@@ -3,6 +3,9 @@
  * Centralized configuration values and constants
  */
 
+// Export theme
+export * from './theme';
+
 export const APP_CONSTANTS = {
   APP_NAME: 'Integrated Farm System',
   VERSION: '1.0.0',

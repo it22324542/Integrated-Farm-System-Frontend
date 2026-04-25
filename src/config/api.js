@@ -112,4 +112,7 @@ export const api = {
   delete: (url, config = {}) => apiClient.delete(url, config),
 };
 
+// Export API_URL for direct fetch calls
+export const API_URL = API_BASE_URL.replace('/api', '');
+
 export default apiClient;
