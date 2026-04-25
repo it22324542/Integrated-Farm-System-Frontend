@@ -63,3 +63,21 @@ coverage/
 *.tmp
 *.temp
 .cache/
+
+# Large binary/media files
+*.pdf
+*.mp4
+*.mov
+*.zip
+*.7z
+*.rar
+
+# Ignore image binaries by default, but keep required app icons
+*.png
+*.jpg
+*.jpeg
+*.gif
+*.bmp
+*.webp
+*.svg
+!assets/*.png
