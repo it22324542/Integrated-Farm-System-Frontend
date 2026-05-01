@@ -120,11 +120,11 @@ const DISEASE_INFO = {
     spread: {
       title: 'How Does Salmonellosis Spread?',
       points: [
-        'Contaminated Feed and Water � the most common transmission route.',
-        'Infected Equipment � tools, cages, or clothing that have been contaminated.',
-        'Rodents and Insects � rats, mice, lesser mealworm, and red mites can act as vectors.',
-        'Visitors � contaminated clothing, footwear, or equipment.',
-        'Transport Vehicles � animal transport and feed providers can spread bacteria farm-to-farm.',
+        'Contaminated Feed and Water : the most common transmission route.',
+        'Infected Equipment : tools, cages, or clothing that have been contaminated.',
+        'Rodents and Insects : rats, mice, lesser mealworm, and red mites can act as vectors.',
+        'Visitors : contaminated clothing, footwear, or equipment.',
+        'Transport Vehicles : animal transport and feed providers can spread bacteria farm-to-farm.',
       ],
     },
     symptoms: {
@@ -207,7 +207,7 @@ const DISEASE_INFO = {
       {
         heading: 'Vaccination (Best Prevention)',
         body:
-          'Use vaccines like the I-2 Newcastle vaccine, which is thermostable, every 3�4 months.',
+          'Use vaccines like the I-2 Newcastle vaccine, which is thermostable, every 3 to 4 months.',
       },
       {
         heading: 'Supportive Care',
@@ -328,7 +328,7 @@ const DISEASE_INFO = {
     emoji: '\u{1F9A0}',
     treatmentSummary:
       'Coccidiosis in poultry is rapidly treated using anticoccidial drugs like Amprolium (usually via water for ' +
-      '~7 days) or sulfa drugs, often targeting the entire flock to halt parasite reproduction. Effective management ' +
+      '7 days) or sulfa drugs, often targeting the entire flock to halt parasite reproduction. Effective management ' +
       'requires strict sanitation (removing wet litter), isolating sick birds, and potentially using vaccines or ' +
       'preventative, rotating coccidiostats to manage resistance.',
     treatmentDetails: [
@@ -354,7 +354,7 @@ const DISEASE_INFO = {
     ],
     criticalNotes: [
       'Vaccination is often used for broiler breeders to build immunity.',
-      'Maintain dry litter � Coccidia thrives in wet, warm conditions.',
+      'Maintain dry litter to prevent oocyst maturation. Coccidia thrives in wet, warm conditions.',
       'Rotate between different types of coccidiostats (ionophores and synthetics) to prevent resistance.',
       'Some herbal extracts (e.g., Artemisia annua) may help reduce parasite shedding.',
     ],
