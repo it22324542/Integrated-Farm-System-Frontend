@@ -1,15 +1,15 @@
 import React from 'react';
 import { NavigationContainer } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
+import SoundUploadScreen from '../screens/SoundUploadScreen';
+import ImageUploadScreen from '../screens/ImageUploadScreen';
+import DroppingUploadScreen from '../screens/DroppingUploadScreen';
 
 /**
  * Root Navigation
- * Main navigation container - ready for screen integration
- * 
- * TODO: Add screens and navigation structure
- * Example:
- * import HomeScreen from '../screens/HomeScreen';
- * <Stack.Screen name="Home" component={HomeScreen} />
+ * Two-step poultry health detection workflow:
+ * 1. Sound Upload - Analyze poultry sounds
+ * 2. Image Upload - Detailed image analysis (only if sound is unhealthy)
  */
 
 const Stack = createStackNavigator();
@@ -18,7 +18,7 @@ const RootNavigator = () => {
   return (
     <NavigationContainer>
       <Stack.Navigator
-        initialRouteName="Placeholder"
+        initialRouteName="SoundUpload"
         screenOptions={{
           headerShown: true,
           headerStyle: {
@@ -28,67 +28,43 @@ const RootNavigator = () => {
           headerTitleStyle: {
             fontWeight: 'bold',
           },
+          // Ensures every screen card fills the available height so that
+          // ScrollView children can scroll properly on web and native.
+          cardStyle: { flex: 1 },
         }}
       >
-        {/* Placeholder screen - replace with actual screens */}
+        {/* Step 1: Sound Analysis */}
         <Stack.Screen 
-          name="Placeholder" 
-          component={PlaceholderScreen}
-          options={{ title: 'Integrated Farm System' }}
+          name="SoundUpload" 
+          component={SoundUploadScreen}
+          options={{ 
+            headerShown: false,
+            headerLeft: null, // Prevent back navigation on first screen
+          }}
         />
         
-        {/* 
-        Future screens will be added here:
-        <Stack.Screen name="Login" component={LoginScreen} />
-        <Stack.Screen name="Home" component={HomeScreen} />
-        <Stack.Screen name="Camera" component={CameraScreen} />
-        */}
+        {/* Step 2: Image Analysis */}
+        <Stack.Screen 
+          name="ImageUpload" 
+          component={ImageUploadScreen}
+          options={{ 
+            headerShown: false,
+            title: 'Image Analysis',
+          }}
+        />
+
+        {/* Step 3: Disease Detection By Using Dropping Images */}
+        <Stack.Screen
+          name="DroppingUpload"
+          component={DroppingUploadScreen}
+          options={{
+            headerShown: false,
+            title: 'Disease Detection',
+          }}
+        />
       </Stack.Navigator>
     </NavigationContainer>
   );
 };
-
-// Temporary placeholder screen
-const PlaceholderScreen = () => {
-  const { View, Text, StyleSheet } = require('react-native');
-  
-  return (
-    <View style={styles.container}>
-      <Text style={styles.title}>Integrated Farm System</Text>
-      <Text style={styles.subtitle}>Frontend Foundation Ready</Text>
-      <Text style={styles.text}>
-        This is a placeholder screen. Replace it with actual screens.
-      </Text>
-    </View>
-  );
-};
-
-const styles = require('react-native').StyleSheet.create({
-  container: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: '#F5F5F5',
-    padding: 20,
-  },
-  title: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    color: '#4CAF50',
-    marginBottom: 10,
-    textAlign: 'center',
-  },
-  subtitle: {
-    fontSize: 18,
-    color: '#2196F3',
-    marginBottom: 20,
-    textAlign: 'center',
-  },
-  text: {
-    fontSize: 14,
-    color: '#757575',
-    textAlign: 'center',
-  },
-});
 
 export default RootNavigator;
